@@ -39,8 +39,8 @@ void *memmove(void *dest, const void *src, size_t n)
 	}
 	else if(d > s)
 	{
-		s += n;
-		d += n;
+		s += n - 1;
+		d += n - 1;
 
 		while(n--)
 		{
@@ -68,10 +68,34 @@ int32_t strncmp(const char *s1, const char *s2, size_t n)
 {
 	int32_t difference = 0;
 
-	while(*(s1++) && *(s2++) && (n--) && !difference)
+	while(*s1 && *s2 && (n--) && !difference)
 	{
-		difference = *s1 - *s2;
+		difference = *(s1++) - *(s2++);
 	}
 
 	return difference;
+}
+
+size_t strlen(const char *s)
+{
+	size_t l = 1;
+
+	while(*(s++))
+	{
+		l++;
+	}
+
+	return l;
+}
+
+uint32_t strfind(const char *s, const char c)
+{
+	uint32_t p = 0;
+
+	while(*s && *(s++) != c)
+	{
+		p++;
+	}
+
+	return p;
 }
