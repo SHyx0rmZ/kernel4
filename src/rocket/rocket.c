@@ -28,6 +28,8 @@ extern gdt_pointer_t gdt_pointer;
 
 void start_rocket_engine()
 {
+	clear_screen();
+
 	print("ASXSoft", COLOR_GRAY);
 	print(" Rocket", COLOR_BLUE);
 	print(" - Loading Kernel...\r\n", COLOR_GRAY); 
