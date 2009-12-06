@@ -35,7 +35,7 @@ void start_rocket_engine(struct multiboot_info *info)
 
 	print("ASXSoft", COLOR_GRAY);
 	print(" Rocket", COLOR_BLUE);
-	print(" - Loading Kernel...\r\n", COLOR_GRAY); 
+	print(" - Loading Kernel...\r\n================================================================================", COLOR_GRAY); 
 
 	print("Initializing GDT...", COLOR_GRAY);
 
@@ -179,7 +179,37 @@ void start_rocket_engine(struct multiboot_info *info)
 	print((const char *)0x2f0000, COLOR_YELLOW);
 	print("\"...", COLOR_GRAY);
 
+        Elf64_Ehdr *hdr = (Elf64_Ehdr *)multiboot->mods_addr[kernel].mod_start;
+        Elf64_Phdr *phdr;
 
+        if ((hdr->e_ident[0] != 0x7F) ||
+	    (hdr->e_ident[1] != 'E')  ||
+	    (hdr->e_ident[2] != 'L')  ||
+	    (hdr->e_ident[3] != 'F'))
+        {
+                print("Kernel is no valid ELF executable", COLOR_RED);
+                reboot();
+        }
+
+        if ((hdr->e_ident[EI_CLASS] != ELFCLASS64)  ||
+            (hdr->e_ident[EI_DATA]  != ELFDATA2LSB) ||
+	    (hdr->e_machine         != EM_X86_64)   ||
+	    (hdr->e_type            != ET_EXEC))
+        {
+                print("Kernel is no x86-64 LSB executable", COLOR_RED);
+                reboot();
+        }
+
+        phdr = (Elf64_Phdr *)((uintptr_t)multiboot->mods_addr[kernel].mod_start + (uintptr_t)hdr->e_phoff);
+        for (int i = 0; i < hdr->e_phnum; i++)
+        {
+                if (phdr[i].p_type != PT_LOAD)
+                        continue;
+                memset((void *)(uintptr_t)phdr[i].p_vaddr, 0, phdr[i].p_memsz);
+                if (!phdr[i].p_filesz)
+                        continue;
+                memcpy((void *)(uintptr_t)phdr[i].p_vaddr, (const void *)((uintptr_t)multiboot->mods_addr[kernel].mod_start + (uintptr_t)phdr[i].p_offset), phdr[i].p_filesz);
+        }
 
 	ewrin();
 	print("Initializing Paging...", COLOR_GRAY);
@@ -193,6 +223,12 @@ void start_rocket_engine(struct multiboot_info *info)
 
 	ewrin();
 
+	print("Starting kernel execution...", COLOR_GREEN);
 
-	while(1);
+	asm(
+		"push $0x10 \n"
+		"push %0 \n"
+		"retf \n"
+		: : "g" (hdr->e_entry) , "D" (multiboot), "S" (&gdt_pointer)
+	   );
 }
