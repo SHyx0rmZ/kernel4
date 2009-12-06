@@ -17,8 +17,13 @@
  */
 
 #include "multiboot.h"
+#include "kernel.h"
+
+typedef void (*constructor)();
 
 extern "C" void entry(struct MultibootInformationSpecification *multiboot_info_32bit);
+extern "C" constructor start_ctors;
+extern "C" constructor end_ctors;
 
 void entry(struct MultibootInformationSpecification *multiboot_info_32bit/*, GDTPointer gdt_pointer*/)
 {
@@ -33,6 +38,14 @@ void entry(struct MultibootInformationSpecification *multiboot_info_32bit/*, GDT
 	multiboot.modules_address = (MultibootModule *)multiboot_info_32bit->mods_addr;
 	multiboot.memory_length = multiboot_info_32bit->mmap_length;
 	multiboot.memory_address = (MultibootMemory *)multiboot_info_32bit->mmap_addr;
+
+
+	for(constructor *i = &start_ctors; i != &end_ctors; ++i)
+	{
+		(*i)();
+	}
+
+	Kernel kernel(multiboot);
 
 	while(1);
 }
