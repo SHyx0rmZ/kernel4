@@ -22,17 +22,17 @@
 uint64_t *paging_initialize()
 {
 	uint64_t *pml4e = (uint64_t *)0x300000LL;
-	*pml4e = 0x30000BLL;
+	*pml4e = 0x30100BLL;
 	uint64_t *pdpe = (uint64_t *)0x301000LL;
-	*pdpe = 0x30100BLL;
-	uint64_t *pd1 = (uint64_t *)0x301000LL;
-	uint64_t *pd2 = (uint64_t *)0x301008LL;
-	uint64_t *pd3 = (uint64_t *)0x301010LL;
-	uint64_t *pd4 = (uint64_t *)0x301018LL;
-	uint64_t *pd5 = (uint64_t *)0x301020LL;
-	uint64_t *pd6 = (uint64_t *)0x301028LL;
-	uint64_t *pd7 = (uint64_t *)0x301030LL;
-	uint64_t *pd8 = (uint64_t *)0x301038LL;
+	*pdpe = 0x30200BLL;
+	uint64_t *pd1 = (uint64_t *)0x302000LL;
+	uint64_t *pd2 = (uint64_t *)0x302008LL;
+	uint64_t *pd3 = (uint64_t *)0x302010LL;
+	uint64_t *pd4 = (uint64_t *)0x302018LL;
+	uint64_t *pd5 = (uint64_t *)0x302020LL;
+	uint64_t *pd6 = (uint64_t *)0x302028LL;
+	uint64_t *pd7 = (uint64_t *)0x302030LL;
+	uint64_t *pd8 = (uint64_t *)0x302038LL;
 	
 	*pd1 = 0x00018FLL;
 	*pd2 = 0x20018FLL;
