@@ -19,14 +19,44 @@
 #include "stdint.h"
 #include "stddef.h"
 #include "gdt.h"
+#include "paging.h"
+#include "reboot.h"
+#include "print.h"
+#include "cpuid.h"
 
 extern gdt_pointer_t gdt_pointer;
 
 void start_rocket_engine()
 {
+	print("ASXSoft", COLOR_GRAY);
+	print(" Rocket", COLOR_BLUE);
+	print(" - Loading Kernel...\r\n", COLOR_GRAY); 
+
 	gdt_initialize();
 	gdt_load();
 	gdt_flush_registers(0x08, 0x18, 0x18, 0x00, 0x00, 0x18);
+
+	cpuid_result_t *cpuid;
+
+	cpuid = cpuid_extended(0x80000001);
+	
+	if((cpuid->edx & 0x20000000) == 0)
+	{
+		print("Your CPU does not support Long Mode", COLOR_RED);
+		reboot();
+	}
+
+	cpuid = cpuid_standard(0x00000001);
+
+	if((cpuid->edx & 0x40) == 0)
+	{
+		print("Your CPU doe not support Physical Adress Extension", COLOR_RED);
+		reboot();
+	}
+
+	uint64_t *pml4 = paging_initialize();
+	
+	paging_activate(pml4);
 
 	while(1);
 }
