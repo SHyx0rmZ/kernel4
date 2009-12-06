@@ -31,4 +31,13 @@ typedef unsigned long long uint64_t;
 typedef  int32_t ptrdiff_t;
 typedef uint32_t uintptr_t;
 
+typedef enum bool
+{
+	FALSE = 0,
+	TRUE = 1
+} bool;
+
+#define false FALSE
+#define true TRUE
+
 #endif
