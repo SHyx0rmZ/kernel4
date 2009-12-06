@@ -34,9 +34,14 @@ void start_rocket_engine()
 	print(" Rocket", COLOR_BLUE);
 	print(" - Loading Kernel...\r\n", COLOR_GRAY); 
 
+	print("Initializing GDT...", COLOR_GRAY);
+
 	gdt_initialize();
 	gdt_load();
 	gdt_flush_registers(0x08, 0x18, 0x18, 0x00, 0x00, 0x18);
+
+	ewrin();
+	print("Checking for Long Mode support...", COLOR_GRAY);
 
 	cpuid_result_t *cpuid;
 
@@ -44,6 +49,7 @@ void start_rocket_engine()
 	
 	if((cpuid->edx & 0x20000000) == 0)
 	{
+		efail();
 		print("Your CPU does not support Long Mode", COLOR_RED);
 		reboot();
 	}
@@ -52,13 +58,22 @@ void start_rocket_engine()
 
 	if((cpuid->edx & 0x40) == 0)
 	{
+		efail();
 		print("Your CPU doe not support Physical Adress Extension", COLOR_RED);
 		reboot();
 	}
 
+	ewrin();
+	print("Initializing Paging...", COLOR_GRAY);
+
 	uint64_t *pml4 = paging_initialize();
 	
+	ewrin();
+	print("Switching to Long Mode...", COLOR_GRAY);
+
 	paging_activate(pml4);
+
+	ewrin();
 
 	while(1);
 }

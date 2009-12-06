@@ -39,5 +39,8 @@
 
 void clear_screen();
 void print(const char *text, uint8_t flags);
+void print_set(uint8_t position);
+void ewrin();
+void efail();
 
 #endif

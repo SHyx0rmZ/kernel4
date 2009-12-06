@@ -74,3 +74,28 @@ void print(const char *text, uint8_t flags)
 		}
 	}
 }
+
+void print_set(uint8_t position)
+{
+	position--;
+
+	position *= 2;
+
+	videomemory = (uint8_t *)((videomemory - ((uint32_t)(videomemory - 0xB8000) % 0xA0)) + position);
+}
+
+void ewrin()
+{
+	print_set(66);
+	print("[", COLOR_GRAY);
+	print("EPIC WRIN", COLOR_GREEN);
+	print("]\r\n", COLOR_GRAY);
+}
+
+void efail()
+{
+	print_set(66);
+	print("[", COLOR_GRAY);
+	print("EPIC FAIL", COLOR_RED);
+	print("]\r\n", COLOR_GRAY);
+}
