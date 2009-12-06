@@ -7,7 +7,7 @@ DIR_CONTENT = $(DIR_BIN)/content/kernel4
 DIR_OBJECT = $(CWD)/obj
 DIR_RESOURCES = $(CWD)/res
 DIR_SOURCE = $(CWD)/src
-DIR_INCLUDE = $(addprefix -I,$(shell find include -type d)) $(addprefix -I,$(shell find $(DIR_SOURCE)/include -type d))
+DIR_INCLUDE = $(addprefix -I,$(shell find $(DIR_SOURCE)/include -type d))
 
 OBJECTS_ROCKET = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_32_asm.o,$(patsubst %.c,%_32_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(shell find $(DIR_SOURCE)/rocket -iregex ".*\.c" -or -iregex ".*\.asm")))))
 OBJECTS_KERNEL4 = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst %.c,%_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(patsubst %.cpp,%_cpp.o,$(shell find $(DIR_SOURCE)/kernel4 -iregex ".*\.cpp" -or -iregex ".*\.c" -or -iregex ".*\.asm"))))))
@@ -23,7 +23,7 @@ LD = ld -n -e entry
 AR = ar -rcs
 
 CFLAGS = -g -c -Wall -Wextra -Werror -pedantic -std=gnu99 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-leading-underscore -O3
-CPPFLAGS = -g -c -Wall -Wextra -Werror -pedantic -std=gnu++98 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -nostdinc++ -fno-use-cxa-atexit -fno-rtti -O3 -m64 $(DIR_INCLUDE)
+CPPFLAGS = -g -c -Wall -Wextra -Werror -pedantic -std=gnu++98 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -nostdinc++ -fno-use-cxa-atexit -fno-rtti -O0 -m64 $(DIR_INCLUDE)
 
 all: $(DIR_CONTENT) clean-little rocket libnuke kernel image
 
