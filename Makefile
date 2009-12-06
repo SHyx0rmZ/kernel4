@@ -7,7 +7,7 @@ DIR_CONTENT = $(DIR_BIN)/content/kernel4
 DIR_OBJECT = $(CWD)/obj
 DIR_RESOURCES = $(CWD)/res
 DIR_SOURCE = $(CWD)/src
-DIR_INCLUDE = $(addprefix -I,$(shell find include -type d) $(addprefix -I,$(shell find $(DIR_SOURCE)/include -type d))
+DIR_INCLUDE = $(addprefix -I,$(shell find include -type d)) $(addprefix -I,$(shell find $(DIR_SOURCE)/include -type d))
 
 OBJECTS_ROCKET = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_32_asm.o,$(patsubst %.c,%_32_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(shell find $(DIR_SOURCE)/rocket -iregex ".*\.c" -or -iregex ".*\.asm")))))
 OBJECTS_KERNEL4 = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst %.c,%_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(shell find $(DIR_SOURCE)/kernel4 -iregex ".*\.cpp" -or -iregex ".*\.c" -or -iregex ".*\.asm")))))
@@ -19,7 +19,7 @@ OBJECTS_LIBNUKE = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst
 CC = gcc
 CPP = g++
 ASM = nasm
-LD = ld -n
+LD = ld -n -e entry
 AR = ar -rcs
 
 CFLAGS = -g -c -Wall -Wextra -Werror -pedantic -std=gnu99 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-leading-underscore -O3
@@ -56,7 +56,7 @@ $(DIR_OBJECT)/%_c.o: $(DIR_SOURCE)/%.c
 	@$(CC) $(CFLAGS) $(DIR_INCLUDE) -m64 $< -o $@
 
 $(DIR_OBJECT)/%_32_c.o: $(DIR_SOURCE)/%.c
-	@mkdir -pv $(dir $@)
+	@mkdir -p $(dir $@)
 	@echo 'CC 32    $<'
 	@$(CC) $(CFLAGS) -m32 $< -o $@
 
