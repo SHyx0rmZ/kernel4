@@ -12,7 +12,7 @@ DIR_INCLUDE = $(addprefix -I,$(shell find $(DIR_SOURCE)/include -type d))
 OBJECTS_ROCKET = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_32_asm.o,$(patsubst %.c,%_32_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(shell find $(DIR_SOURCE)/rocket -iregex ".*\.c" -or -iregex ".*\.asm")))))
 OBJECTS_KERNEL4 = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst %.c,%_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(patsubst %.cpp,%_cpp.o,$(shell find $(DIR_SOURCE)/kernel4 -iregex ".*\.cpp" -or -iregex ".*\.c" -or -iregex ".*\.asm"))))))
 RESOURCES_FUEL = $(shell find $(DIR_RESOURCES))
-OBJECTS_LIBNUKE = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst %.c,%_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(shell find $(DIR_SOURCE)/libnuke -iregex ".*\.cpp" -or -iregex ".*\.c" -or -iregex ".*\.asm")))))
+OBJECTS_LIBNUKE = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst %.c,%_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(patsubst %.cpp,%_cpp.o,$(shell find $(DIR_SOURCE)/libnuke -iregex ".*\.cpp" -or -iregex ".*\.c" -or -iregex ".*\.asm"))))))
 
 .PHONY: all rocket kernel fuel libnuke image clean clean-little do-the-real-cleaning do-the-real-cleaning-little
 
