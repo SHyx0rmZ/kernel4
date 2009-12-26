@@ -14,15 +14,34 @@
  *
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */     
+ */
 
 #include "kernel.h"
 #include "multiboot.h"
 #include "stdint.h"
 #include "stddef.h"
+#include "gdt.h"
+
 
 Kernel::Kernel(MultibootInformation multiboot)
 {
+	GDTTable gdt(5, 0x200000 - (5 * 8));
+
+	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode, GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
+	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring0));
+	gdt.SetEntry(2, GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
+	gdt.SetEntry(3, GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring3));
+	gdt.SetEntry(4, GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring3));
+
+	gdt.MakeActive();
+
+	gdt.ReloadSegment(GDTSegmentRegister::CS, 1);
+	gdt.ReloadSegment(GDTSegmentRegister::DS, 2);
+	gdt.ReloadSegment(GDTSegmentRegister::ES, 2);
+	gdt.ReloadSegment(GDTSegmentRegister::FS, 0);
+	gdt.ReloadSegment(GDTSegmentRegister::GS, 0);
+	gdt.ReloadSegment(GDTSegmentRegister::SS, 2);
+
 	while(multiboot.flags);
 }
 
