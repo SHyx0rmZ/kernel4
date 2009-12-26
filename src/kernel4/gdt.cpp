@@ -194,6 +194,11 @@ bool GDTEntry::SetConforming(bool conforming)
 	{
 		return false;
 	}
+
+	this->access &= ~(1 << 2);
+	this->access |= (conforming << 2);
+
+	return true;
 }
 
 bool GDTEntry::SetExecuteOnly(bool executeonly)
@@ -202,6 +207,11 @@ bool GDTEntry::SetExecuteOnly(bool executeonly)
 	{
 		return false;
 	}
+
+	this->access &= ~(1 << 1);
+	this->access |= (executeonly << 1);
+	
+	return true;
 }
 
 bool GDTEntry::SetExpandDown(bool expanddown)
@@ -210,22 +220,36 @@ bool GDTEntry::SetExpandDown(bool expanddown)
 	{
 		return false;
 	}
+
+	this->access &= ~(1 << 2);
+	this->access |= (expanddown << 2);
+	
+	return true;
 }
 
 void GDTEntry::SetGranularity(GDTGranularity granularity)
 {
+	this->flags_and_limit_high &= ~(1 << 7);
+	this->flags_and_limit_high |= (granularity << 7);
 }
 
 void GDTEntry::SetLimit(uint32_t limit)
 {
+	this->limit_low = (limit & 0xFFFF);
+	this->flags_and_limit_high &= 0xF0;
+	this->flags_and_limit_high |= ((limit >> 16) & 0x0F);
 }
 
 void GDTEntry::SetMode(GDTMode mode)
 {
+	this->flags_and_limit_high &= ~(3 << 5);
+	this->flags_and_limit_high |= (mode << 5);
 }
 
 void GDTEntry::SetPresence(GDTPresence presence)
 {
+	this->access &= ~(1 << 7);
+	this->access |= (presence << 7);
 }
 
 bool GDTEntry::SetReadOnly(bool readonly)
@@ -234,53 +258,94 @@ bool GDTEntry::SetReadOnly(bool readonly)
 	{
 		return false;
 	}
+
+	this->access &= ~(1 << 1);
+	this->access |= (readonly << 1);
+	
+	return true;
 }
 
 void GDTEntry::SetRing(GDTRing ring)
 {
+	this->access &= ~(3 << 5);
+	this->access|= (ring << 5);
 }
 
 bool GDTEntry::SetSystemType(GDTSystemType32 systemtype)
 {
-	if(!this->IsSystemSegment())
+	if(!this->IsSystemSegment() || (systemtype == Invalid32))
 	{
 		return false;
 	}
+
+	this->access &= 0xF0;
+	this->access |= (systemtype & 0x0F);
+	
+	return true;
 }
 
 bool GDTEntry::SetSystemType(GDTSystemType64 systemtype)
 {
-	if(!this->IsSystemSegment())
+	if(!this->IsSystemSegment() || (systemtype == Invalid64))
 	{
 		return false;
 	}
+
+	this->access &= 0xF0;
+	this->access |= (systemtype & 0x0F);
+	
+	return true;
 }
 
 bool GDTEntry::SetSystemType32(GDTSystemType32 systemtype)
 {
-	if(!this->IsSystemSegment())
+	if(!this->IsSystemSegment() || (systemtype == Invalid32))
 	{
 		return false;
 	}
+
+	this->access &= 0xF0;
+	this->access |= (systemtype & 0x0F);
+	
+	return true;
 }
 
 bool GDTEntry::SetSystemType64(GDTSystemType64 systemtype)
 {
-	if(!this->IsSystemSegment())
+	if(!this->IsSystemSegment() || (systemtype == Invalid64))
 	{
 		return false;
 	}
+
+	this->access &= 0xF0;
+	this->access |= (systemtype & 0x0F);
+	
+	return true;
 }
 
 void GDTEntry::SetType(GDTType type)
 {
+	switch(type)
+	{
+		case System:
+			this->access |= 0x10;
+			break;
+		case Code:
+			this->access &= ~0x10;
+			this->access |= 0x0A;
+			break;
+		case Data:
+			this->access &= ~0x10;
+			this->access |= 0x02;
+			break;
+	}
 }
 
 //TODO: FIX ONLY UNTIL HERE (YES I LIED XD).................................
 
 GDTTable::GDTTable(uint8_t size, uintptr_t position)
 {
-	this->limit = (size * 8) - 1;
+	this->limit = ((size + 1) * 8) - 1;
 	this->base = (GDTEntry *)position;
 }
 
@@ -297,6 +362,79 @@ GDTEntry GDTTable::GetEntry(uint8_t index)
 uint8_t GDTTable::GetSize()
 {
 	return (this->limit + 1) / 8;
+}
+
+bool GDTTable::IsActive()
+{
+	uint16_t temp_limit = this->limit;
+	GDTEntry *temp_base = this->base;
+
+	asm(
+		"sgdt %0 \n"
+		: : "m" (*this)
+	);
+
+	bool same = ((this->limit == temp_limit) && (this->base == temp_base));
+
+	this->limit = temp_limit;
+	this->base = temp_base;
+
+	return same;
+}
+
+void GDTTable::MakeActive()
+{
+	asm(
+		"lgdt %0 \n"
+
+		: : "m" (*this)
+	);
+}
+
+void GDTTable::ReloadSegment(SegmentRegister segment, uint8_t index)
+{
+	switch(segment)
+	{
+		case CS:
+			asm(
+				"push %%rax \n"
+				"push $1f \n"
+				"rex.w retf \n"
+				"1: \n"
+				: : "a" (index << 3)
+			);
+			break;
+		case DS:
+			asm(
+				"mov %0, %%ds \n"
+				: : "r" (index << 3)
+			);
+			break;
+		case ES:
+			asm(
+				"mov %0, %%es \n"
+				: : "r" (index << 3)
+			);
+			break;
+		case FS:
+			asm(
+				"mov %0, %%fs \n"
+				: : "r" (index << 3)
+			);
+			break;
+		case GS:
+			asm(
+				"mov %0, %%gs \n"
+				: : "r" (index << 3)
+			);
+			break;
+		case SS:
+			asm(
+				"mov %0, %%ss \n"
+				: : "r" (index << 3)
+			);
+			break;
+	}
 }
 
 void GDTTable::SetEntry(uint8_t index, GDTEntry entry)

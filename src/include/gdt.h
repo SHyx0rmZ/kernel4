@@ -103,6 +103,16 @@ enum GDTType
 	Code = 2
 };
 
+enum SegmentRegister
+{
+	CS = 0,
+	DS = 1,
+	ES = 2,
+	FS = 3,
+	GS = 4,
+	SS = 5
+};
+
 class GDTEntry
 {
 	public:
@@ -159,9 +169,13 @@ class GDTTable
 		GDTTable(uint8_t size, uintptr_t position);
 		~GDTTable();
 
-		GDTEntry GetEntry(uint8_t index);
-		uint8_t GetSize();
-		void SetEntry(uint8_t index, GDTEntry entry);
+		GDTEntry 	GetEntry(uint8_t index);
+		uint8_t		GetIndex(GDTEntry entry);
+		uint8_t 	GetSize();
+		bool 		IsActive();
+		void 		MakeActive();
+		void 		ReloadSegment(SegmentRegister segment, uint8_t index);
+		void 		SetEntry(uint8_t index, GDTEntry entry);
 
 	private:
 		uint16_t limit;
