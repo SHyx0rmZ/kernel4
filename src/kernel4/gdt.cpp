@@ -8,10 +8,7 @@
  *   (at your option) any later version.
  *
  *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY
-{
-}
- without even the implied warranty of
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *   GNU General Public License for more details.
  *
@@ -21,57 +18,28 @@
 
 #include "gdt.h"
 
-/*GDTEntry::GDTEntry(GDTMode mode, uint8_t flags, uint8_t access, uintptr_t base, uint32_t limit)
-{
-	// Bogus code, to enable compilation :D
-	this->limit_low = limit & 0xFFFF
-{
-}
-
-	this->base_low = base & 0xFFFF
-{
-}
-
-	this->base_middle = (base >> 16) & 0xFF
-{
-}
-
-	this->access = access
-{
-}
-
-	this->flags_and_limit_high = ((flags & 0xF) << 4) | ((mode & 6) << 1) | ((limit >> 16) & 0xF)
-{
-}
-
-	this->base_high = (base >> 24) & 0xFF
-{
-}
-
-}*/
-
 GDTEntry::GDTEntry(GDTMode mode, GDTType type, GDTRing ring, uintptr_t base, uint32_t limit, GDTGranularity granularity, GDTPresence presence)
 {
 	this->base_low = (base & 0xFFFF);
 	this->base_middle = ((base >> 16) & 0xFF);
 	this->base_high = ((base >> 24) & 0xFF);
 	this->limit_low = (limit & 0xFFFF);
-	this->flags_and_limit_high = ((limit >> 16) & 0x0F) | ((mode << 5) & 0x60) | ((granularity << 7) & 0x80);
+	this->flags_and_limit_high = ((limit >> 16) & 0x0F) | (((uint8_t)mode << 5) & 0x60) | (((uint8_t)granularity << 7) & 0x80);
 
 	switch(type)
 	{
-		case System:
-			this->access = 0x10;
+		case GDTType::System:
+			this->access = 0x00;
 			break;
-		case Code:
-			this->access = 0x0A;
+		case GDTType::Code:
+			this->access = 0x1A;
 			break;
-		case Data:
-			this->access = 0x02;
+		case GDTType::Data:
+			this->access = 0x12;
 			break;
 	}
 
-	this->access |= ((ring << 5) & 0x60) | ((presence << 7) & 0x80);
+	this->access |= (((uint8_t)ring << 5) & 0x60) | (((uint8_t)presence << 7) & 0x80);
 }
 
 GDTEntry::~GDTEntry()
@@ -112,7 +80,7 @@ GDTSystemType32 GDTEntry::GetSystemType32()
 {
 	if(!this->IsSystemSegment())
 	{
-		return Invalid32;
+		return GDTSystemType32::Invalid;
 	}
 
 	return (GDTSystemType32)(this->access & 0x0F);
@@ -122,7 +90,7 @@ GDTSystemType64 GDTEntry::GetSystemType64()
 {
 	if(!this->IsSystemSegment())
 	{
-		return Invalid64;
+		return GDTSystemType64::Invalid;
 	}
 
 	return (GDTSystemType64)(this->access & 0x0F);
@@ -130,17 +98,17 @@ GDTSystemType64 GDTEntry::GetSystemType64()
 
 GDTType GDTEntry::GetType()
 {
-	if((this->access >> 4) & 1)
+	if(((this->access >> 4) & 1) == 0)
 	{
-		return System;
+		return GDTType::System;
 	}
 	else if((this->access >> 3) & 1)
 	{
-		return Code;
+		return GDTType::Code;
 	}
 	else
 	{
-		return Data;
+		return GDTType::Data;
 	}
 }
 
@@ -176,7 +144,7 @@ bool GDTEntry::IsReadOnly()
 
 bool GDTEntry::IsSystemSegment()
 {
-	return (((this->access >> 4) & 1) == 1);
+	return (((this->access >> 4) & 1) == 0);
 }
 
 void GDTEntry::SetBase(uintptr_t address)
@@ -185,8 +153,6 @@ void GDTEntry::SetBase(uintptr_t address)
 	this->base_middle = ((address >> 16) & 0xFF);
 	this->base_high = ((address >> 24) & 0xFF);
 }
-
-//TODO: FIX EVERYTHING FROM HERE ON.........................................
 
 bool GDTEntry::SetConforming(bool conforming)
 {
@@ -230,7 +196,7 @@ bool GDTEntry::SetExpandDown(bool expanddown)
 void GDTEntry::SetGranularity(GDTGranularity granularity)
 {
 	this->flags_and_limit_high &= ~(1 << 7);
-	this->flags_and_limit_high |= (granularity << 7);
+	this->flags_and_limit_high |= ((uint8_t)granularity << 7);
 }
 
 void GDTEntry::SetLimit(uint32_t limit)
@@ -243,13 +209,13 @@ void GDTEntry::SetLimit(uint32_t limit)
 void GDTEntry::SetMode(GDTMode mode)
 {
 	this->flags_and_limit_high &= ~(3 << 5);
-	this->flags_and_limit_high |= (mode << 5);
+	this->flags_and_limit_high |= ((uint8_t)mode << 5);
 }
 
 void GDTEntry::SetPresence(GDTPresence presence)
 {
 	this->access &= ~(1 << 7);
-	this->access |= (presence << 7);
+	this->access |= ((uint8_t)presence << 7);
 }
 
 bool GDTEntry::SetReadOnly(bool readonly)
@@ -268,57 +234,57 @@ bool GDTEntry::SetReadOnly(bool readonly)
 void GDTEntry::SetRing(GDTRing ring)
 {
 	this->access &= ~(3 << 5);
-	this->access|= (ring << 5);
+	this->access|= ((uint8_t)ring << 5);
 }
 
 bool GDTEntry::SetSystemType(GDTSystemType32 systemtype)
 {
-	if(!this->IsSystemSegment() || (systemtype == Invalid32))
+	if(!this->IsSystemSegment() || (systemtype == GDTSystemType32::Invalid))
 	{
 		return false;
 	}
 
 	this->access &= 0xF0;
-	this->access |= (systemtype & 0x0F);
+	this->access |= ((uint8_t)systemtype & 0x0F);
 	
 	return true;
 }
 
 bool GDTEntry::SetSystemType(GDTSystemType64 systemtype)
 {
-	if(!this->IsSystemSegment() || (systemtype == Invalid64))
+	if(!this->IsSystemSegment() || (systemtype == GDTSystemType64::Invalid))
 	{
 		return false;
 	}
 
 	this->access &= 0xF0;
-	this->access |= (systemtype & 0x0F);
+	this->access |= ((uint8_t)systemtype & 0x0F);
 	
 	return true;
 }
 
 bool GDTEntry::SetSystemType32(GDTSystemType32 systemtype)
 {
-	if(!this->IsSystemSegment() || (systemtype == Invalid32))
+	if(!this->IsSystemSegment() || (systemtype == GDTSystemType32::Invalid))
 	{
 		return false;
 	}
 
 	this->access &= 0xF0;
-	this->access |= (systemtype & 0x0F);
+	this->access |= ((uint8_t)systemtype & 0x0F);
 	
 	return true;
 }
 
 bool GDTEntry::SetSystemType64(GDTSystemType64 systemtype)
 {
-	if(!this->IsSystemSegment() || (systemtype == Invalid64))
+	if(!this->IsSystemSegment() || (systemtype == GDTSystemType64::Invalid))
 	{
 		return false;
 	}
 
 	this->access &= 0xF0;
-	this->access |= (systemtype & 0x0F);
+	this->access |= ((uint8_t)systemtype & 0x0F);
 	
 	return true;
 }
@@ -327,25 +293,29 @@ void GDTEntry::SetType(GDTType type)
 {
 	switch(type)
 	{
-		case System:
-			this->access |= 0x10;
-			break;
-		case Code:
+		case GDTType::System:
 			this->access &= ~0x10;
-			this->access |= 0x0A;
 			break;
-		case Data:
-			this->access &= ~0x10;
-			this->access |= 0x02;
+		case GDTType::Code:
+			this->access |= 0x1A;
+			break;
+		case GDTType::Data:
+			this->access |= 0x12;
 			break;
 	}
 }
 
-//TODO: FIX ONLY UNTIL HERE (YES I LIED XD).................................
-
 GDTTable::GDTTable(uint8_t size, uintptr_t position)
 {
-	this->limit = ((size + 1) * 8) - 1;
+	if(size == 0)
+	{
+		this->limit = 0;
+	}
+	else
+	{
+		this->limit = ((size) * 8) - 1;
+	}
+
 	this->base = (GDTEntry *)position;
 }
 
@@ -387,15 +357,15 @@ void GDTTable::MakeActive()
 	asm(
 		"lgdt %0 \n"
 
-		: : "m" (*this)
+		: : "g" (*this)
 	);
 }
 
-void GDTTable::ReloadSegment(SegmentRegister segment, uint8_t index)
+void GDTTable::ReloadSegment(GDTSegmentRegister segment, uint8_t index)
 {
 	switch(segment)
 	{
-		case CS:
+		case GDTSegmentRegister::CS:
 			asm(
 				"push %%rax \n"
 				"push $1f \n"
@@ -404,31 +374,31 @@ void GDTTable::ReloadSegment(SegmentRegister segment, uint8_t index)
 				: : "a" (index << 3)
 			);
 			break;
-		case DS:
+		case GDTSegmentRegister::DS:
 			asm(
 				"mov %0, %%ds \n"
 				: : "r" (index << 3)
 			);
 			break;
-		case ES:
+		case GDTSegmentRegister::ES:
 			asm(
 				"mov %0, %%es \n"
 				: : "r" (index << 3)
 			);
 			break;
-		case FS:
+		case GDTSegmentRegister::FS:
 			asm(
 				"mov %0, %%fs \n"
 				: : "r" (index << 3)
 			);
 			break;
-		case GS:
+		case GDTSegmentRegister::GS:
 			asm(
 				"mov %0, %%gs \n"
 				: : "r" (index << 3)
 			);
 			break;
-		case SS:
+		case GDTSegmentRegister::SS:
 			asm(
 				"mov %0, %%ss \n"
 				: : "r" (index << 3)

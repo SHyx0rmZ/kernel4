@@ -21,45 +21,26 @@
 
 #include <stdint.h>
 
-enum GDTGranularity
+enum class GDTGranularity : uint8_t
 {
 	Byte = 0,
 	Block = 1
 };
 
-enum GDTMode
+enum class GDTMode : uint8_t
 {
 	RealMode = 0,
 	LongMode = 1,
 	ProtectedMode = 2
 };
 
-/*enum GDTType
-{
-	DataReadOnly = 0,
-	DataReadOnlyAccessed = 1,
-	DataReadWrite = 2,
-	DataReadWriteAccessed = 3,
-	DataReadOnlyExpandDown = 4,
-	DataReadOnlyExpandDownAccessed = 5,
-	DataReadWriteExpandDown = 6,
-	DataReadWriteExpandDownAccessed = 7,
-	CodeExecuteOnly = 8,
-	CodeExecuteOnlyAccessed = 9,
-	CodeExecuteRead = 10,
-	CodeExecuteReadAccessed = 11,
-	CodeExecuteOnlyConforming = 12,
-	CodeExecuteOnlyConformingAccessed = 13,
-	CodeExecuteReadConforming = 14,
-	CodeExecuteReadConformingAccessed = 15
-};*/
-enum GDTPresence
+enum class GDTPresence : uint8_t
 {
 	NonPresent = 0,
 	Present = 1
 };
 
-enum GDTRing
+enum class GDTRing : uint8_t
 {
 	Ring0 = 0,
 	Ring1 = 1,
@@ -67,43 +48,43 @@ enum GDTRing
 	Ring3 = 3
 };
 
-enum GDTSystemType32
+enum class GDTSystemType32 : uint8_t
 {
 	TaskStateSegment16Available = 1,
-	LocalDescriptorTable32 = 2,
+	LocalDescriptorTable = 2,
 	TaskStateSegment16Busy = 3,
 	CallGate16 = 4,
 	TaskGate = 5,
 	InterruptGate16 = 6,
 	TrapGate16 = 7,
-	TaskStateSegment32Available = 9,
-	TaskStateSegment32Busy = 11,
-	CallGate32 = 12,
-	InterruptGate32 = 14,
-	TrapGate32 = 15,
-	Invalid32 = 255
+	TaskStateSegmentAvailable = 9,
+	TaskStateSegmentBusy = 11,
+	CallGate = 12,
+	InterruptGate = 14,
+	TrapGate = 15,
+	Invalid = 255
 };
 
-enum GDTSystemType64
+enum class GDTSystemType64 : uint8_t
 {
 	UpperHalf16 = 0,
-	LocalDescriptorTable64 = 2,
-	TaskStateSegment64Available = 9,
-	TaskStateSegment64Busy = 11,
-	CallGate64 = 12,
-	InterruptGate64 = 14,
-	TrapGate64 = 15,
-	Invalid64 = 255
+	LocalDescriptorTable = 2,
+	TaskStateSegmentAvailable = 9,
+	TaskStateSegmentBusy = 11,
+	CallGate = 12,
+	InterruptGate = 14,
+	TrapGate = 15,
+	Invalid = 255
 };
 
-enum GDTType
+enum class GDTType : uint8_t
 {
 	System = 0,
 	Data = 1,
 	Code = 2
 };
 
-enum SegmentRegister
+enum class GDTSegmentRegister : uint8_t
 {
 	CS = 0,
 	DS = 1,
@@ -116,8 +97,7 @@ enum SegmentRegister
 class GDTEntry
 {
 	public:
-		//GDTEntry(GDTMode mode, uint8_t flags, uint8_t access = 10, uintptr_t base = 0, uint32_t limit = 0xFFFFFFFF);
-		GDTEntry(GDTMode mode, GDTType type, GDTRing ring, uintptr_t base = 0, uint32_t limit = 0xFFFFFFFF, GDTGranularity granularity = Block, GDTPresence presence = Present);
+		GDTEntry(GDTMode mode, GDTType type, GDTRing ring, uintptr_t base = 0, uint32_t limit = 0xFFFFFFFF, GDTGranularity granularity = GDTGranularity::Block, GDTPresence presence = GDTPresence::Present);
 		~GDTEntry();
 
 		uintptr_t 	GetBase();
@@ -151,8 +131,6 @@ class GDTEntry
 		bool 		SetSystemType32(GDTSystemType32 systemtype);
 		bool 		SetSystemType64(GDTSystemType64 systemtype);
 		void 		SetType(GDTType type);
-		//TODO: implement
-		//char 		*ToString();
 
 	private:
 		uint16_t limit_low;
@@ -161,7 +139,7 @@ class GDTEntry
 		uint8_t access;
 		uint8_t flags_and_limit_high;
 		uint8_t base_high;
-};
+} __attribute__((packed));
 
 class GDTTable
 {
@@ -174,12 +152,12 @@ class GDTTable
 		uint8_t 	GetSize();
 		bool 		IsActive();
 		void 		MakeActive();
-		void 		ReloadSegment(SegmentRegister segment, uint8_t index);
+		void 		ReloadSegment(GDTSegmentRegister segment, uint8_t index);
 		void 		SetEntry(uint8_t index, GDTEntry entry);
 
 	private:
 		uint16_t limit;
 		GDTEntry *base;
-};
+} __attribute__((packed));
 
 #endif
