@@ -21,12 +21,18 @@
 
 #include <stdint.h>
 
+/**
+ * The granularities a segment can have
+ */
 enum class GDTGranularity : uint8_t
 {
 	Byte = 0,
 	Block = 1
 };
 
+/**
+ * The different operating modes a segment can have
+ */
 enum class GDTMode : uint8_t
 {
 	RealMode = 0,
@@ -34,12 +40,18 @@ enum class GDTMode : uint8_t
 	ProtectedMode = 2
 };
 
+/**
+ * The presence states a segment can have
+ */
 enum class GDTPresence : uint8_t
 {
 	NonPresent = 0,
 	Present = 1
 };
 
+/**
+ * The privilege levels a segment can have
+ */
 enum class GDTRing : uint8_t
 {
 	Ring0 = 0,
@@ -48,6 +60,9 @@ enum class GDTRing : uint8_t
 	Ring3 = 3
 };
 
+/**
+ * The different types of system segments in Protected Mode
+ */
 enum class GDTSystemType32 : uint8_t
 {
 	TaskStateSegment16Available = 1,
@@ -65,6 +80,9 @@ enum class GDTSystemType32 : uint8_t
 	Invalid = 255
 };
 
+/**
+ * The different types of system segments in Long Mode
+ */
 enum class GDTSystemType64 : uint8_t
 {
 	UpperHalf16 = 0,
@@ -77,6 +95,9 @@ enum class GDTSystemType64 : uint8_t
 	Invalid = 255
 };
 
+/**
+ * The different types a segment can have
+ */
 enum class GDTType : uint8_t
 {
 	System = 0,
@@ -84,6 +105,9 @@ enum class GDTType : uint8_t
 	Code = 2
 };
 
+/**
+ * The different segment register there are on a x86_64
+ */
 enum class GDTSegmentRegister : uint8_t
 {
 	CS = 0,
@@ -94,6 +118,9 @@ enum class GDTSegmentRegister : uint8_t
 	SS = 5
 };
 
+/**
+ * A GDTEntry to be used in constructing a valid GDT
+ */
 class GDTEntry
 {
 	public:
@@ -132,6 +159,8 @@ class GDTEntry
 		bool 		SetSystemType64(GDTSystemType64 systemtype);
 		void 		SetType(GDTType type);
 
+		friend bool 	operator==(const GDTEntry e1, const GDTEntry e2);
+
 	private:
 		uint16_t limit_low;
 		uint16_t base_low;
@@ -141,6 +170,9 @@ class GDTEntry
 		uint8_t base_high;
 } __attribute__((packed));
 
+/**
+ * A structure to manage multiple GDTEntries that form a GDT
+ */
 class GDTTable
 {
 	public:

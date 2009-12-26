@@ -22,16 +22,20 @@
 #include "stddef.h"
 #include "gdt.h"
 
-
+/**
+ * Creates a new instance of the kernel
+ * 
+ * \param multiboot The multiboot information structure the bootloader created
+ */
 Kernel::Kernel(MultibootInformation multiboot)
 {
-	GDTTable gdt(5, 0x200000 - (5 * 8));
+	GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
 
-	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode, GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
-	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring0));
-	gdt.SetEntry(2, GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
-	gdt.SetEntry(3, GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring3));
-	gdt.SetEntry(4, GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring3));
+	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode, 		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
+	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode, 		GDTType::Code, GDTRing::Ring0));
+	gdt.SetEntry(2, GDTEntry(GDTMode::ProtectedMode, 	GDTType::Data, GDTRing::Ring0));
+	gdt.SetEntry(3, GDTEntry(GDTMode::LongMode, 		GDTType::Code, GDTRing::Ring3));
+	gdt.SetEntry(4, GDTEntry(GDTMode::ProtectedMode, 	GDTType::Data, GDTRing::Ring3));
 
 	gdt.MakeActive();
 
@@ -45,6 +49,9 @@ Kernel::Kernel(MultibootInformation multiboot)
 	while(multiboot.flags);
 }
 
+/**
+ * The kernel can not be shutdown and instead enters a endless loop
+ */
 Kernel::~Kernel()
 {
 	while(1);
