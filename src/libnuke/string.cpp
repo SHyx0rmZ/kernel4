@@ -28,22 +28,59 @@ void *memmove(void *dest, const void *src, size_t n)
 	char *d = (char *)dest;
 	char *s = (char *)src;
 
-	size_t b = n % sizeof(unsigned long);
-
-	n -= b;
-	n /= sizeof(unsigned long);
-
-	while(b--)
+	if(dest > src)
 	{
-		*(d++) = *(s++);
+		d += n - 1;
+		s += n - 1;
 	}
 
-	unsigned long *db = (unsigned long *)d;
-	unsigned long *sb = (unsigned long *)s;
+	size_t b = n;
 
-	while(n--)
+	if((signed long)((unsigned long)dest - (unsigned long)src) < -(signed long)sizeof(unsigned long) 
+		|| (signed long)((unsigned long)dest - (unsigned long)src) > (signed long)sizeof(unsigned long))
 	{
-		*(db++) = *(sb++);
+		b %= sizeof(unsigned long);
+
+		n -= b;
+		n /= sizeof(unsigned long);
+	}
+	else
+	{
+		n = 0;
+	}
+
+	unsigned long *db;
+	unsigned long *sb;
+
+	if(dest <= src)
+	{
+		while(b--)
+		{
+			*(d++) = *(s++);
+		}
+
+		db = (unsigned long *)d;
+		sb = (unsigned long *)s;
+
+		while(n--)
+		{
+			*(db++) = *(sb++);
+		}
+	}
+	else
+	{
+		while(b--)
+		{
+			*(d--) = *(s--);
+		}
+
+		db = (unsigned long *)d;
+		sb = (unsigned long *)s;
+
+		while(n--)
+		{
+			*(db--) = *(sb--);
+		}
 	}
 
 	return dest;
