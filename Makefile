@@ -23,7 +23,7 @@ LD = ld -n -e entry
 AR = ar -rcs
 
 CFLAGS = -g -c -Wall -Wextra -Werror -pedantic -std=gnu99 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-leading-underscore -O3
-CPPFLAGS = -g -c -Wall -Wextra -Werror -std=gnu++98 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -nostdinc++ -fno-use-cxa-atexit -fno-rtti -O0 -m64 $(DIR_INCLUDE)
+CPPFLAGS = -g -c -Wall -Wextra -Werror -std=gnu++0x -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -nostdinc++ -fno-use-cxa-atexit -fno-rtti -O0 -m64 $(DIR_INCLUDE)
 
 all: $(DIR_CONTENT) clean-little rocket libnuke kernel image
 
