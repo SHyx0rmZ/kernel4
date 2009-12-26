@@ -18,9 +18,13 @@
 
 #include "kernel.h"
 #include "multiboot.h"
-#include "stdint.h"
-#include "stddef.h"
-#include "gdt.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <gdt.h>
+#include <io.h>
+#include <console.h>
+
+Console console;
 
 /**
  * Creates a new instance of the kernel
@@ -29,6 +33,10 @@
  */
 Kernel::Kernel(MultibootInformation multiboot)
 {
+	console.Clear();
+
+	console << "Initializing GDT... ";
+
 	GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
 
 	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode, 		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
@@ -46,7 +54,21 @@ Kernel::Kernel(MultibootInformation multiboot)
 	gdt.ReloadSegment(GDTSegmentRegister::GS, 0);
 	gdt.ReloadSegment(GDTSegmentRegister::SS, 2);
 
-	while(multiboot.flags);
+	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
+	console << "Entering endless loop...\r\n";
+
+	uint16_t f = 0;
+
+	while(multiboot.flags)
+	{
+		if(!f--)
+		{
+			console << ConsoleColor::Red << "I " << ConsoleColor::Blue << "am "
+				<< ConsoleColor::Green << "not " << ConsoleColor::Yellow << "idling"
+				<< ConsoleColor::Gray << "! ";
+		}
+	}
+
 }
 
 /**
