@@ -31,6 +31,7 @@ depth dd 0
 section .text
 
 entry:
+cli
 mov esp, 0x300000
 
 push ebx
