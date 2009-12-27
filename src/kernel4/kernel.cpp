@@ -23,8 +23,11 @@
 #include <gdt.h>
 #include <io.h>
 #include <console.h>
+#include <memory.h>
 
 Console console;
+MemoryStack memoryb(0x1000000);
+MemoryStack memory(0x1100000);
 
 /**
  * Creates a new instance of the kernel
@@ -34,6 +37,43 @@ Console console;
 Kernel::Kernel(MultibootInformation multiboot)
 {
 	console.Clear();
+
+	console << "Initializing memory pool...\r\n";
+
+	if((multiboot.flags & (1 << 6)) == 0)
+	{
+		console << "EPIC FAIL";
+		while(1);
+	}
+
+	MultibootMemory *memstart = multiboot.memory_address;
+	MultibootMemory *memend = (MultibootMemory *)((uintptr_t)multiboot.memory_address + multiboot.memory_length);
+
+	while(memstart < memend)
+	{
+		console << "Memory block @ " << memstart->address << " - " << memstart->address + memstart->length;
+
+		if(memstart->type == MultibootMemoryType::Available)
+		{
+			console << ConsoleColor::Green << " OK\r\n" << ConsoleColor::Gray;
+
+			uintptr_t mstart = ((memstart->address + 0x0FFF) & ~0x0FFF);
+			uintptr_t mend = ((memstart->address + memstart->length) & ~0x0FFF);
+
+			while(mstart < mend && (mend - mstart) >= 0x1000)
+			{
+				memory.Push(mstart);
+
+				mstart += 0x1000;
+			}
+		}
+		else
+		{
+			console << ConsoleColor::Red << " FAIL\r\n" << ConsoleColor::Gray;
+		}
+
+		memstart = (MultibootMemory *)((uintptr_t)memstart + memstart->size + 4);
+	}
 
 	console << "Initializing GDT... ";
 
