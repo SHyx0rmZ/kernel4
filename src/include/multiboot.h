@@ -21,7 +21,7 @@
 
 #include "stdint.h"
 
-enum MultibootMemoryType
+enum class MultibootMemoryType : uint32_t
 {
 	Available = 1,
 	System = 2,
@@ -31,19 +31,21 @@ enum MultibootMemoryType
 
 class MultibootMemory
 {
-	uint32_t size;
-	uintptr_t address;
-	uint64_t length;
-	MultibootMemoryType type;
-};
+	public:
+		uint32_t size;
+		uintptr_t address;
+		uint64_t length;
+		MultibootMemoryType type;
+} __attribute__((packed));
 
 class MultibootModule
 {
-	void *module_start;
-	void *module_end;
-	char *name;
-	uint8_t reserved[4];
-};
+	public:
+		void *module_start;
+		void *module_end;
+		char *name;
+		uint8_t reserved[4];
+} __attribute__((packed));
 
 class MultibootInformation
 {
@@ -58,7 +60,7 @@ class MultibootInformation
 		uint64_t memory_length;
 		MultibootMemory *memory_address;
 		// TODO: drives, apm
-};
+} __attribute__((packed));
 
 struct MultibootInformationSpecification
 {
@@ -87,6 +89,6 @@ struct MultibootInformationSpecification
 	uint32_t vbe_interface_off;
 	uint32_t vbe_interface_len;
 	uint32_t size;
-};
+} __attribute__((packed));
 
 #endif
