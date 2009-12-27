@@ -75,21 +75,21 @@ void start_rocket_engine(struct multiboot_info *info)
 
 	if(FLAG_ISSET(multiboot->mi_flags, 2))
 	{
-		memcpy(multiboot + multiboot->size, multiboot->cmdline, strlen(multiboot->cmdline));
-		multiboot->cmdline = (char *)(multiboot + multiboot->size);
+		memcpy((void *)((uint32_t)multiboot + multiboot->size), multiboot->cmdline, strlen(multiboot->cmdline));
+		multiboot->cmdline = (char *)((uint32_t)multiboot + multiboot->size);
 		multiboot->size += strlen(multiboot->cmdline);
 	}
 
 	if(FLAG_ISSET(multiboot->mi_flags, 3))
 	{
-		memcpy(multiboot + multiboot->size, multiboot->mods_addr, multiboot->mods_count * sizeof(struct multiboot_module));
-		multiboot->mods_addr = (struct multiboot_module *)(multiboot + multiboot->size);
+		memcpy((void *)((uint32_t)multiboot + multiboot->size), multiboot->mods_addr, multiboot->mods_count * sizeof(struct multiboot_module));
+		multiboot->mods_addr = (struct multiboot_module *)((uint32_t)multiboot + multiboot->size);
 		multiboot->size += multiboot->mods_count * sizeof(struct multiboot_module);
 
 		for(uint32_t mods = 0; mods < multiboot->mods_count; mods++)
 		{
-			memcpy(multiboot + multiboot->size, multiboot->mods_addr[mods].string, strlen(multiboot->mods_addr[mods].string));
-			multiboot->mods_addr[mods].string = (char *)(multiboot + multiboot->size);
+			memcpy((void *)((uint32_t)multiboot + multiboot->size), multiboot->mods_addr[mods].string, strlen(multiboot->mods_addr[mods].string));
+			multiboot->mods_addr[mods].string = (char *)((uint32_t)multiboot + multiboot->size);
 			multiboot->size += strlen(multiboot->mods_addr[mods].string);
 		}
 	}
@@ -105,11 +105,11 @@ void start_rocket_engine(struct multiboot_info *info)
 		struct multiboot_memory_map *mem_s = (struct multiboot_memory_map *)multiboot->mmap_addr;
 		struct multiboot_memory_map *mem_e = (struct multiboot_memory_map *)((uint32_t)multiboot->mmap_addr + (uint32_t)multiboot->mmap_length);
 
-		multiboot->mmap_addr = (struct multiboot_memory_map *)(multiboot + multiboot->size);
+		multiboot->mmap_addr = (struct multiboot_memory_map *)((uint32_t)multiboot + multiboot->size);
 
 		while(mem_s < mem_e)
 		{
-			memcpy(multiboot + multiboot->size, mem_s, mem_s->size + 4);
+			memcpy((void *)((uint32_t)multiboot + multiboot->size), mem_s, mem_s->size + 4);
 			multiboot->size += mem_s->size + 4;
 			mem_s = (struct multiboot_memory_map *)((uint32_t)mem_s + mem_s->size + 4);
 		}
