@@ -33,15 +33,19 @@ uint64_t *paging_initialize()
 	uint64_t *pd6 = (uint64_t *)0x302028LL;
 	uint64_t *pd7 = (uint64_t *)0x302030LL;
 	uint64_t *pd8 = (uint64_t *)0x302038LL;
+	uint64_t *pd9 = (uint64_t *)0x302040LL;
+	uint64_t *pd0 = (uint64_t *)0x302048LL;
 	
-	*pd1 = 0x00018FLL;
-	*pd2 = 0x20018FLL;
-	*pd3 = 0x40018FLL;
-	*pd4 = 0x60018FLL;
-	*pd5 = 0x80018FLL;
-	*pd6 = 0xA0018FLL;
-	*pd7 = 0xC0018FLL;
-	*pd8 = 0xE0018FLL;
+	*pd1 = 0x000018FLL;
+	*pd2 = 0x020018FLL;
+	*pd3 = 0x040018FLL;
+	*pd4 = 0x060018FLL;
+	*pd5 = 0x080018FLL;
+	*pd6 = 0x0A0018FLL;
+	*pd7 = 0x0C0018FLL;
+	*pd8 = 0x0E0018FLL;
+	*pd9 = 0x100018FLL;
+	*pd0 = 0x120018FLL;
 
 	return (uint64_t *)0x300000LL;
 }
