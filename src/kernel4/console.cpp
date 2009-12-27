@@ -68,10 +68,18 @@ void Console::Convert(char *buffer, uint16_t buffersize, uint64_t number, uint16
 	base %= 35;
 	buffersize %= 257;
 
+	if(number == 0)
+	{
+		buffer[0] = '0';
+		buffer[1] = 0;
+
+		return;
+	}
+
 	for(i = 255; i > 0 && number > 0; i--)
 	{
 		c[i] = (number % base) + 0x30;
-		
+
 		if(c[i] > 0x39)
 		{
 			c[i] += 7;
@@ -106,7 +114,8 @@ Console &Console::operator<<(const char *text)
 			default:
 				if((uint64_t)video >= 0xB8000 + 80 * 25 * 2)
 				{
-					memmove((void *)0xB8000, (void*)(0xB8000 + 160), 80 * 24 * 2);
+					memmove((void *)0xB8000, (void*)(0xB8000 + 160), 160 * 24);
+					memset((void *)(0xB8000 + 160 * 24), 0, 160);
 					video = (uint16_t *)((uint64_t)video - 160);
 				}
 
@@ -131,9 +140,11 @@ Console &Console::operator<<(uint64_t number)
 			break;
 		case ConsoleState::Hex:
 			this->Convert(converted, 256, number, 16);
+			*this << "0x";
 			break;
 		case ConsoleState::Octal:
 			this->Convert(converted, 256, number, 8);
+			*this << "0";
 			break;
 	}
 
