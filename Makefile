@@ -14,7 +14,7 @@ OBJECTS_KERNEL4 = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst
 RESOURCES_FUEL = $(shell find $(DIR_RESOURCES))
 OBJECTS_LIBNUKE = $(addprefix $(DIR_OBJECT)/,$(patsubst %.asm,%_asm.o,$(patsubst %.c,%_c.o,$(patsubst $(DIR_SOURCE)/%,%,$(patsubst %.cpp,%_cpp.o,$(shell find $(DIR_SOURCE)/libnuke -iregex ".*\.cpp" -or -iregex ".*\.c" -or -iregex ".*\.asm"))))))
 
-.PHONY: all rocket kernel fuel libnuke image clean clean-little do-the-real-cleaning do-the-real-cleaning-little
+.PHONY: all rocket kernel fuel libnuke image clean clean-little do-the-real-cleaning do-the-real-cleaning-little todo
 
 CC = gcc
 CPP = g++
@@ -106,3 +106,6 @@ clean-little:
 
 do-the-real-cleaning-little:
 	@-rm -R $(DIR_CONTENT)/* $(DIR_BIN)/libnuke.a $(DIR_BIN)/fd.img 2> /dev/null
+
+todo:
+	@find src -type f -exec grep -H TODO \{\} \; 2> /dev/null
