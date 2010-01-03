@@ -24,10 +24,13 @@
 #include <io.h>
 #include <console.h>
 #include <memory.h>
+#include <managers.h>
 
 Console console;
-MemoryStack memoryb(0x1000000);
-MemoryStack memory(0x1100000);
+//MemoryStack memoryb(0x1000000);
+//MemoryStack memory(0x1100000);
+MemoryManager memory;
+PagingManager pages(0xF00000);
 
 /**
  * Creates a new instance of the kernel
@@ -57,15 +60,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 		{
 			console << ConsoleColor::Green << " OK\r\n" << ConsoleColor::Gray;
 
-			uintptr_t mstart = ((memstart->address + 0x0FFF) & ~0x0FFF);
-			uintptr_t mend = ((memstart->address + memstart->length) & ~0x0FFF);
-
-			while(mstart < mend && (mend - mstart) >= 0x1000)
-			{
-				memory.Push(mstart);
-
-				mstart += 0x1000;
-			}
+			memory.Initialize(memstart->address, memstart->length);
 		}
 		else
 		{
