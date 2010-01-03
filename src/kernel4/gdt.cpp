@@ -550,6 +550,7 @@ GDTTable::~GDTTable()
  */
 GDTEntry GDTTable::GetEntry(uint8_t index)
 {
+	//TODO: Error Checking
 	return this->base[index];
 }
 
@@ -612,7 +613,6 @@ void GDTTable::MakeActive()
 {
 	asm(
 		"lgdt %0 \n"
-
 		: : "g" (*this)
 	);
 }
@@ -677,5 +677,6 @@ void GDTTable::ReloadSegment(GDTSegmentRegister segment, uint8_t index)
  */
 void GDTTable::SetEntry(uint8_t index, GDTEntry entry)
 {
+	//TODO: Error Checking
 	this->base[index] = entry;
 }
