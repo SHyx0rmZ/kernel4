@@ -34,6 +34,11 @@ MemoryStack::~MemoryStack()
 {
 }
 
+uint64_t MemoryStack::GetSize()
+{
+	return this->size;
+}
+
 bool MemoryStack::IsEmpty()
 {
 	return (this->size == 0);
@@ -73,6 +78,11 @@ MemoryManager::MemoryManager()
 
 MemoryManager::~MemoryManager()
 {
+}
+
+uint64_t MemoryManager::GetAvailableMemory()
+{
+	return memory.GetSize() * 0x1000;
 }
 
 void MemoryManager::VFree(uintptr_t address)

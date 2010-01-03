@@ -19,12 +19,30 @@
 #ifndef _TASK_H_
 #define _TASK_H_
 
+#include <memory.h>
+
 class TaskState
 {
 	public:
+		uint64_t address, length;
 		uint64_t ds, es, fs, gs, rax, rbx, rcx, rdx, rsi, rdi, rbp; 
 		uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
 		uint64_t interrupt, error, rip, cs, rflags, rsp, ss;
 } __attribute__((packed));
+
+/*class ExtendedTaskState
+{
+	public:
+		PageBlock *page_blocks;
+		uint64_t
+		VirtualBlock *virtual_blocks;
+};*/
+
+class CompleteTaskState
+{
+	public:
+		TaskState *cpu;
+		//ExtendedTaskState *process;
+}:
 
 #endif

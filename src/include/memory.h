@@ -27,6 +27,7 @@ class MemoryStack
 		MemoryStack(uintptr_t address);
 		~MemoryStack();
 
+		uint64_t GetSize();
 		bool IsEmpty();
 		uintptr_t Pop();
 		void Push(uintptr_t block);
@@ -53,6 +54,7 @@ class MemoryManager
 		MemoryManager();
 		~MemoryManager();
 
+		uint64_t GetAvailableMemory();
 		void Initialize(uintptr_t address, uint64_t length);
 		uintptr_t PAlloc();
 		void PFree(uintptr_t block);
@@ -63,5 +65,19 @@ class MemoryManager
 		static MemoryBitmap lowmemory;
 		static MemoryStack memory;
 };
+
+class VirtualBlock
+{
+	public:
+		uintptr_t address;
+		uint64_t size;
+} __attribute__((packed));
+
+class PageBlock
+{
+	public:
+		uintptr_t base;
+		uintptr_t current;
+} __attribute__((packed));
 
 #endif

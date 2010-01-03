@@ -165,6 +165,12 @@ Kernel::Kernel(MultibootInformation multiboot)
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
 	console << "Enabling interrupts... ";
 
+	uint64_t timer_divisor = 4773; // 249.98 Hz
+
+	out8(0x43, 0x34);
+	out8(0x40, (timer_divisor & 0xFF));
+	out8(0x40, (timer_divisor >> 8));
+	
 	asm("sti");
 
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
