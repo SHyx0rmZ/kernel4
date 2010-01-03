@@ -40,6 +40,13 @@ enum class ConsoleColor
 	White = 15
 };
 
+enum class ConsoleArea
+{
+	Top = 0,
+	Middle = 1,
+	Bottom = 2,
+};
+
 class Console
 {
 	public:
@@ -47,8 +54,10 @@ class Console
 		~Console();
 
 		void Clear();
+		ConsoleArea GetArea();
 		uint8_t GetAttribute();
 		ConsoleState GetState();
+		void SetArea(ConsoleArea area);
 		void SetAttribute(uint8_t attribute);
 		void SetState(ConsoleState state);
 
@@ -58,12 +67,15 @@ class Console
 		Console &operator<<(uint64_t number);
 		Console &operator<<(ConsoleColor color);
 		Console &operator<<(ConsoleState state);
+		Console &operator<<(ConsoleArea area);
 
 	private:
 		static uint16_t *video;
 
 		uint16_t attribute;
 		ConsoleState state;
+		ConsoleArea area;
+		uint16_t *vl_top, *vl_middle, *vl_bottom;
 };
 
 #endif

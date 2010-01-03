@@ -43,6 +43,8 @@ Kernel::Kernel(MultibootInformation multiboot)
 {
 	console.Clear();
 
+	console << ConsoleArea::Top << ConsoleColor::DarkGray << "ASXSoft " << ConsoleColor::Blue << "Nuke " << ConsoleColor::DarkGray << "- " << ConsoleColor::Blue << "Version 0.4" << ConsoleColor::Gray << ConsoleArea::Middle;
+
 	console << "Initializing memory pool...\r\n";
 
 	if((multiboot.flags & (1 << 6)) == 0)
@@ -157,7 +159,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	out8(0x21, 0x01); // 8086
 	out8(0xA1, 0x01); // 8086
 
-	out8(0x21, 0x01); // Masking
+	out8(0x21, 0x00); // Masking
 	out8(0xA1, 0x00); // Masking
 
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
@@ -167,6 +169,11 @@ Kernel::Kernel(MultibootInformation multiboot)
 
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
 	console << "Entering endless loop...\r\n";
+
+	while(1)
+	{
+		asm("hlt");
+	}
 
 	uint16_t f = 0;
 

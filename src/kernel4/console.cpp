@@ -20,13 +20,17 @@
 #include <console.h>
 #include <string.h>
 
-uint16_t *Console::video = (uint16_t *)0xB8000;
+uint16_t *Console::video = (uint16_t *)(0xB8000 + 160);
 
 Console::Console()
 {
-	this->video = (uint16_t *)0xB8000;
+	this->video = (uint16_t *)(0xB8000 + 160);
 	this->attribute = 0x0700;
 	this->state = ConsoleState::Hex;
+	this->area = ConsoleArea::Middle;
+	this->vl_top = (uint16_t *)(0xB8000);
+	this->vl_middle = this->video;
+	this->vl_bottom = (uint16_t *)(0xB8000 + 160 * 24);
 }
 
 Console::~Console()
@@ -35,8 +39,15 @@ Console::~Console()
 
 void Console::Clear()
 {
-	this->video = (uint16_t *)0xB8000;
+	*this << ConsoleArea::Middle;
+	this->video = (uint16_t *)(0xB8000 + 160);
 	memset((void *)0xB8000, 0, 80 * 25 * 2);
+	*this << ConsoleArea::Top << "                                                                                \n" << ConsoleArea::Bottom << "                                                                                                    \n" << ConsoleArea::Middle;
+}
+
+ConsoleArea Console::GetArea()
+{
+	return this->area;
 }
 
 uint8_t Console::GetAttribute()
@@ -47,6 +58,37 @@ uint8_t Console::GetAttribute()
 ConsoleState Console::GetState()
 {
 	return this->state;
+}
+
+void Console::SetArea(ConsoleArea area)
+{
+	switch(this->area)
+	{
+		case ConsoleArea::Top:
+			this->vl_top = this->video;
+			break;
+		case ConsoleArea::Middle:
+			this->vl_middle = this->video;
+			break;
+		case ConsoleArea::Bottom:
+			this->vl_bottom = this->video;
+			break;
+	}
+
+	this->area = area;
+
+	switch(area)
+	{
+		case ConsoleArea::Top:
+			this->video = this->vl_top;
+			break;
+		case ConsoleArea::Middle:
+			this->video = this->vl_middle;
+			break;
+		case ConsoleArea::Bottom:
+			this->video = this->vl_bottom;
+			break;
+	}
 }
 
 void Console::SetAttribute(uint8_t attribute)
@@ -101,29 +143,82 @@ void Console::Convert(char *buffer, uint16_t buffersize, uint64_t number, uint16
 
 Console &Console::operator<<(const char *text)
 {
-	while(*text)
+	switch(this->GetArea())
 	{
-		switch(*text)
-		{
-			case '\n':
-				video = (uint16_t *)((uint64_t)video + 160);
-				break;
-			case '\r':
-				video = (uint16_t *)((uint64_t)video - (((uint64_t)video - 0xB8000) % 160));
-				break;
-			default:
-				if((uint64_t)video >= 0xB8000 + 80 * 25 * 2)
+		case ConsoleArea::Middle:
+			while(*text)
+			{
+				switch(*text)
 				{
-					memmove((void *)0xB8000, (void*)(0xB8000 + 160), 160 * 24);
-					memset((void *)(0xB8000 + 160 * 24), 0, 160);
-					video = (uint16_t *)((uint64_t)video - 160);
+					case '\n':
+						video = (uint16_t *)((uint64_t)video + 160);
+						break;
+					case '\r':
+						video = (uint16_t *)((uint64_t)video - (((uint64_t)video - 0xB8000) % 160));
+						break;
+					default:
+						if((uint64_t)video >= 0xB8000 + 160 * 24)
+						{
+							memmove((void *)(0xB8000 + 160), (void*)(0xB8000 + 160 * 2), 160 * 22);
+							memset((void *)(0xB8000 + 160 * 23), 0, 160);
+							video = (uint16_t *)((uint64_t)video - 160);
+						}
+
+						*(video++) = *text | this->attribute;
+						break;
 				}
 
-				*(video++) = *text | this->attribute;
-				break;
-		}
+				text++;
+			}
+			break;
+		case ConsoleArea::Top:
+			while(*text)
+			{
+				switch(*text)
+				{
+					case '\n':
+					case '\r':
+						video = (uint16_t *)0xB8000;
+						break;
+					default:
+						if((uint64_t)video >= 0xB8000 + 160)
+						{
+							memmove((void *)0xB8000, (void *)(0xB8000 + 2), 158);
+							memset((void *)(0xB8000 + 158), 0, 2);
+							video = (uint16_t *)((uint64_t)video - 2);
+						}
 
-		text++;
+						*(video++) = *text | this->attribute | (0x70 << 8);
+						break;
+				}
+
+				text++;
+			}
+			break;
+		case ConsoleArea::Bottom:
+			while(*text)
+			{
+				switch(*text)
+				{
+					case '\n':
+					case '\r':
+						video = (uint16_t *)(0xB8000 + 160 * 24);
+						break;
+					default:
+						if((uint64_t)video >= 0xB8000 + 160 * 25)
+						{
+							memmove((void *)(0xB8000 + 160 * 24), (void *)(0xB8000 + 2 + 160 * 24), 158);
+							memset((void *)(0xB8000 + 158 + 160 * 24), 0, 2);
+							video = (uint16_t *)((uint64_t)video - 2);
+						}
+
+						*(video++) = *text | this->attribute | (0x70 << 8);
+						break;
+				}
+
+				text++;
+			}
+			break;
 	}
 
 	return *this;
@@ -161,6 +256,13 @@ Console &Console::operator<<(ConsoleColor color)
 Console &Console::operator<<(ConsoleState state)
 {
 	this->SetState(state);
+
+	return *this;
+}
+
+Console &Console::operator<<(ConsoleArea area)
+{
+	this->SetArea(area);
 
 	return *this;
 }
