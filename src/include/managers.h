@@ -22,9 +22,11 @@
 #include <memory.h>
 #include <paging.h>
 #include <console.h>
+#include <task.h>
 
 extern MemoryManager memory;
 extern PagingManager paging;
 extern Console console;
+extern TaskManager scheduler;
 
 #endif

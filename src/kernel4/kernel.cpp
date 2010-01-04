@@ -33,6 +33,7 @@ Console console;
 //MemoryStack memory(0x1100000);
 MemoryManager memory;
 PagingManager pages(0xF00000);
+TaskManager scheduler(0xE00000, 4000);
 
 /**
  * Creates a new instance of the kernel
@@ -58,7 +59,20 @@ Kernel::Kernel(MultibootInformation multiboot)
 
 	while(memstart < memend)
 	{
-		console << "Memory block @ " << memstart->address << " - " << memstart->address + memstart->length;
+		console << "Memory block @ " << ConsoleState::HexFixed << memstart->address << " - " << memstart->address + memstart->length << " (" << ConsoleState::Decimal << ConsoleColor::Blue;
+		
+		uint64_t memsize = memstart->length / 1024;
+
+		if(memsize > 1024)
+		{
+			console << memsize / 1024 << " MiB";
+		}
+		else
+		{
+			console << memsize << " KiB";
+		}
+
+		console << ConsoleColor::Gray << ") ";
 
 		if(memstart->type == MultibootMemoryType::Available)
 		{

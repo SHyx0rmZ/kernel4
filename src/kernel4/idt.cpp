@@ -17,8 +17,19 @@
  */
 
 #include <stdint.h>
+#include <stddef.h>
 #include <idt.h>
 
+/**
+ * Creates a new IDTEntry
+ *
+ * \param offset The offset to the interrupt service routine
+ * \param type The type this IDTEntry represents, either a Interrupt Gate or a Trap
+ * \param selector The GDT selector of the code segment the interrupt service routine is in
+ * \param ring The privilege level this IDTEntry has
+ * \param ist The interrupt stack to use
+ * \param present If the IDTEntry is present
+ */
 IDTEntry::IDTEntry(uintptr_t offset, IDTType type, uint16_t selector, IDTRing ring, IDTIST ist, bool present)
 {
 	this->offset_low = (offset & 0xFFFF);
@@ -29,39 +40,73 @@ IDTEntry::IDTEntry(uintptr_t offset, IDTType type, uint16_t selector, IDTRing ri
 	this->reserved = 0;
 }
 
+/**
+ * Destroys the IDTEntry
+ */
 IDTEntry::~IDTEntry()
 {
 }
 
+/**
+ * Get the interrupt stack this IDTEntry uses
+ *
+ * \returns The interrupt stack used by this IDTEntry
+ */
 IDTIST IDTEntry::GetIST()
 {
 	return (IDTIST)(this->flags & 0x7);
 }
 
+/**
+ * Get the offset to the interrupt service routine
+ *
+ * \returns The offset to the interrupt service routine
+ */
 uintptr_t IDTEntry::GetOffset()
 {
 	return (((uint64_t)this->offset_high << 32) | ((uint64_t)this->offset_mid << 16) | ((uint64_t)this->offset_low));
 }
 
+/**
+ * Get the privilege level of this IDTEntry
+ *
+ * \returns The privilege level of this IDTEntry
+ */
 IDTRing IDTEntry::GetRing()
 {
 	return (IDTRing)((this->flags >> 13) & 3);
 }
 
+/**
+ * Get the GDT selector
+ *
+ * \returns the GDT selector
+ */
 uint16_t IDTEntry::GetSelector()
 {
 	return this->selector;
 }
 
+/**
+ * Get the type of this IDTEntry
+ *
+ * \returns The type of this IDTEntry
+ */
 IDTType IDTEntry::GetType()
 {
 	return (IDTType)((this->flags >> 8) & 1);
 }
 
+/**
+ * Is this IDTEntry present?
+ *
+ * \returns true if the IDTEntry is present, false otherwise
+ */
 bool IDTEntry::IsPresent()
 {
 	return (this->flags & (1 << 15)) ? true : false;
 }
+
 
 void IDTEntry::SetIST(IDTIST ist)
 {
@@ -130,7 +175,11 @@ IDTTable::~IDTTable()
 
 IDTEntry IDTTable::GetEntry(uint8_t index)
 {
-	//TODO: Error Checking
+	if(index >= this->GetSize())
+	{
+		return NULL;
+	}
+
 	return this->base[index];
 }
 
@@ -180,6 +229,8 @@ void IDTTable::MakeActive()
 
 void IDTTable::SetEntry(uint8_t index, IDTEntry entry)
 {
-	//TODO: Error Checking
-	this->base[index] = entry;
+	if(index < this->GetSize())
+	{
+		this->base[index] = entry;
+	}
 }
