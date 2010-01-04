@@ -19,6 +19,7 @@ global entry
 
 section .multiboot
 
+; Multiboot header
 header dd 0x1BADB002
 flags dd 0x00000007
 checksum dd 0xE4524FF7
@@ -30,6 +31,7 @@ depth dd 0
 
 section .text
 
+; Deactivate interrupts, create stack and call main
 entry:
 cli
 mov esp, 0x300000
@@ -37,6 +39,7 @@ mov esp, 0x300000
 push ebx
 call start_rocket_engine
 
+; Idle
 idle:
 cli
 hlt

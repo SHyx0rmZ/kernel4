@@ -25,7 +25,8 @@ enum class ConsoleState
 {
 	Decimal,
 	Hex,
-	Octal
+	Octal,
+	HexFixed
 };
 
 enum class ConsoleColor
