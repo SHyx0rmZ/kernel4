@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "stddef.h"
 #include "gdt.h"
 
 /**
@@ -546,11 +547,15 @@ GDTTable::~GDTTable()
  * Get a GDTEntry at a specific index
  *
  * \param The index of the GDTEntry
- * \returns The GDTEntry indexed by index
+ * \returns The GDTEntry indexed by index, NULL if index is invalid
  */
 GDTEntry GDTTable::GetEntry(uint8_t index)
 {
-	//TODO: Error Checking
+	if(index >= this->GetSize())
+	{
+		return NULL;
+	}
+
 	return this->base[index];
 }
 
@@ -677,6 +682,8 @@ void GDTTable::ReloadSegment(GDTSegmentRegister segment, uint8_t index)
  */
 void GDTTable::SetEntry(uint8_t index, GDTEntry entry)
 {
-	//TODO: Error Checking
-	this->base[index] = entry;
+	if(index < this->GetSize())
+	{
+		this->base[index] = entry;
+	}
 }

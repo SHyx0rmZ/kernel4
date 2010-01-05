@@ -3,9 +3,14 @@
 #include <task.h>
 #include <io.h>
 
-uint64_t timer = 0;
-uint64_t freemem = 0;
+uint64_t timer = 0; // Uptime
+uint64_t freemem = 0; // Amount of free memory
 
+/**
+ * Handle interrupts
+ *
+ * \param task The TaskState of the current task
+ */
 void handle_interrupt(TaskState *task)
 {
 	asm("cli");
@@ -18,6 +23,7 @@ void handle_interrupt(TaskState *task)
 			while(1);
 
 			break;
+		// IRQ 0
 		case 32:
 			timer += 1000;
 

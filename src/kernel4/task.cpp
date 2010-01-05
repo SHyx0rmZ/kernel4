@@ -39,8 +39,6 @@ TaskManager::TaskManager(uintptr_t position, uint16_t maximum_task_number)
 		"movq -0x10(%%rbp), %0 \n"
 		: "=r" (e)
 	);
-
-	//this->Create(e);
 }
 
 TaskManager::~TaskManager()

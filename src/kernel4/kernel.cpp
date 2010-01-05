@@ -44,10 +44,12 @@ Kernel::Kernel(MultibootInformation multiboot)
 {
 	console.Clear();
 
+	// Wonderful TUI
 	console << ConsoleArea::Top << ConsoleColor::DarkGray << "ASXSoft " << ConsoleColor::Blue << "Nuke " << ConsoleColor::DarkGray << "- " << ConsoleColor::Blue << "Version 0.4" << ConsoleColor::Gray << ConsoleArea::Middle;
 
 	console << "Initializing memory pool...\r\n";
 
+	// If Bit 6 is cleared there is no memory map, so abort
 	if((multiboot.flags & (1 << 6)) == 0)
 	{
 		console << "EPIC FAIL";
@@ -57,8 +59,10 @@ Kernel::Kernel(MultibootInformation multiboot)
 	MultibootMemory *memstart = multiboot.memory_address;
 	MultibootMemory *memend = (MultibootMemory *)((uintptr_t)multiboot.memory_address + multiboot.memory_length);
 
+	// Scan each memory block in the memory map
 	while(memstart < memend)
 	{
+		// Print some information
 		console << "Memory block @ " << ConsoleState::HexFixed << memstart->address << " - " << memstart->address + memstart->length << " (" << ConsoleState::Decimal << ConsoleColor::Blue;
 		
 		uint64_t memsize = memstart->length / 1024;
@@ -74,6 +78,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 
 		console << ConsoleColor::Gray << ") ";
 
+		// If it is free memory, add it to the memory ppol
 		if(memstart->type == MultibootMemoryType::Available)
 		{
 			console << ConsoleColor::Green << " OK\r\n" << ConsoleColor::Gray;
@@ -85,11 +90,14 @@ Kernel::Kernel(MultibootInformation multiboot)
 			console << ConsoleColor::Red << " FAIL\r\n" << ConsoleColor::Gray;
 		}
 
+		// Next memory block
 		memstart = (MultibootMemory *)((uintptr_t)memstart + memstart->size + 4);
 	}
 
 	console << "Initializing GDT... ";
 
+	// TODO: Replace address with new()
+	// Set up the GDT
 	GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
 
 	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode, 		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
@@ -98,6 +106,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	gdt.SetEntry(3, GDTEntry(GDTMode::LongMode, 		GDTType::Code, GDTRing::Ring3));
 	gdt.SetEntry(4, GDTEntry(GDTMode::ProtectedMode, 	GDTType::Data, GDTRing::Ring3));
 
+	// Load GDT and set up proper segments
 	gdt.MakeActive();
 
 	gdt.ReloadSegment(GDTSegmentRegister::CS, 1);
@@ -110,13 +119,17 @@ Kernel::Kernel(MultibootInformation multiboot)
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
 	console << "Intializing IDT... ";
 
+	// TODO: Replace address with new()
+	// Set up IDT
 	IDTTable idt(128, 0x200000 - (5 * sizeof(GDTEntry)) - (128 * sizeof(IDTEntry)));
 
+	// Install dummy handlers for every interrupt
 	for(uint16_t i = 0; i < idt.GetSize(); i++)
 	{
 		idt.SetEntry(i, IDTEntry((uintptr_t)isr_null, IDTType::Trap));
 	}
 
+	// Set the handlers of interrupts we want to handle
 	idt.SetEntry(0, IDTEntry((uintptr_t)exception_stub_0));
 	idt.SetEntry(1, IDTEntry((uintptr_t)exception_stub_1));
 	idt.SetEntry(2, IDTEntry((uintptr_t)exception_stub_2));
@@ -156,11 +169,13 @@ Kernel::Kernel(MultibootInformation multiboot)
 	idt.SetEntry(46, IDTEntry((uintptr_t)irq_stub_14, IDTType::Trap));
 	idt.SetEntry(47, IDTEntry((uintptr_t)irq_stub_15, IDTType::Trap));
 
+	// Load IDT
 	idt.MakeActive();
 
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
 	console << "Remapping IRQs... ";
 
+	// Initialize the PIC
 	out8(0x20, 0x11); // Initialize Master
 	out8(0xA0, 0x11); // Initialize Slave
 
@@ -179,34 +194,24 @@ Kernel::Kernel(MultibootInformation multiboot)
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
 	console << "Enabling interrupts... ";
 
+	// Set a new frequency for IRQ 0
 	uint64_t timer_divisor = 4773; // 249.98 Hz
 
 	out8(0x43, 0x34);
 	out8(0x40, (timer_divisor & 0xFF));
 	out8(0x40, (timer_divisor >> 8));
 	
+	// Enable Interrupts (Taskswitchs)
 	asm("sti");
 
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
 	console << "Entering endless loop...\r\n";
 
+	// Idle
 	while(1)
 	{
 		asm("hlt");
 	}
-
-	uint16_t f = 0;
-
-	while(multiboot.flags)
-	{
-		if(!f--)
-		{
-			console << ConsoleColor::Red << "I " << ConsoleColor::Blue << "am "
-				<< ConsoleColor::Green << "not " << ConsoleColor::Yellow << "idling"
-				<< ConsoleColor::Gray << "! ";
-		}
-	}
-
 }
 
 /**

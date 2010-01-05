@@ -107,13 +107,22 @@ bool IDTEntry::IsPresent()
 	return (this->flags & (1 << 15)) ? true : false;
 }
 
-
+/**
+ * Set the interrupt stack
+ *
+ * \param ist The stack the interrupt routine should use
+ */
 void IDTEntry::SetIST(IDTIST ist)
 {
 	this->flags &= ~7;
 	this->flags |= ((uint8_t)ist & 7);
 }
 
+/**
+ * Set offset to interrupt routine
+ *
+ * \param offset Offset to interrupt routine
+ */
 void IDTEntry::SetOffset(uintptr_t offset)
 {
 	this->offset_low = (offset & 0xFFFF);
@@ -121,29 +130,56 @@ void IDTEntry::SetOffset(uintptr_t offset)
 	this->offset_high = ((offset >> 32) & 0xFFFFFFFF);
 }
 
+/**
+ * Make the IDTEntry present or not present
+ *
+ * \param present Shall the IDTEntry be marked present?
+ */
 void IDTEntry::SetPresence(bool present)
 {
 	this->flags &= ~(1 << 15);
 	this->flags |= ((present & 1) << 15);
 }
 
+/**
+ * Set the privilege level
+ *
+ * \param ring The privilege level
+ */
 void IDTEntry::SetRing(IDTRing ring)
 {
 	this->flags &= ~(3 << 13);
 	this->flags |= (((uint8_t)ring & 3) << 13);
 }
 
+/**
+ * Set code segment selector
+ *
+ * \param selector The new code segment selector
+ */
 void IDTEntry::SetSelector(uint16_t selector)
 {
 	this->selector = selector;
 }
 
+/**
+ * Set the interrupt type
+ *
+ * \param type The interrupt type
+ */
 void IDTEntry::SetType(IDTType type)
 {
 	this->flags &= ~(1 << 8);
 	this->flags |= (((uint8_t)type & 1) << 8);
 }
 
+/**
+ * Compare two IDTEntries
+ *
+ * \param e1 The first IDTEntry
+ * \param e2 The second IDTEntry
+ * \returns true if both IDTEntries are equal, false otherwise
+ */
 bool operator ==(const IDTEntry e1, const IDTEntry e2)
 {
 	if((e1.offset_low == e2.offset_low) && (e1.offset_mid == e2.offset_mid && (e1.flags == e2.flags))
@@ -155,6 +191,12 @@ bool operator ==(const IDTEntry e1, const IDTEntry e2)
 	return false;
 }
 
+/**
+ * Create a new IDTTable
+ *
+ * \param size The number of IDTEntries that fit into this IDTTable
+ * \param position The address of the IDTTable (or rather the IDTEntries)
+ */
 IDTTable::IDTTable(uint8_t size, uintptr_t position)
 {
 	if(size == 0)
@@ -169,10 +211,19 @@ IDTTable::IDTTable(uint8_t size, uintptr_t position)
 	this->base = (IDTEntry *)position;
 }
 
+/**
+ * Destroys the IDTTable
+ */
 IDTTable::~IDTTable()
 {
 }
 
+/**
+ * Get an IDTEntry from the IDTTable
+ *
+ * \param index The index of the IDTEntry
+ * \returns The IDTEntry at index index, NULL if index is invalid
+ */
 IDTEntry IDTTable::GetEntry(uint8_t index)
 {
 	if(index >= this->GetSize())
@@ -183,6 +234,12 @@ IDTEntry IDTTable::GetEntry(uint8_t index)
 	return this->base[index];
 }
 
+/**
+ * Get the index of a specific IDTEntry
+ *
+ * \param entry The IDTEntry to search in the IDTTable
+ * \returns The index of the searched IDTEntry, -1 if not found
+ */
 uint8_t IDTTable::GetIndex(IDTEntry entry)
 {
 	for(uint8_t i = 0; i < this->GetSize(); i++)
@@ -196,37 +253,63 @@ uint8_t IDTTable::GetIndex(IDTEntry entry)
 	return -1;
 }
 
+/**
+ * Get the number of IDTEntries that fit into this IDTTable
+ *
+ * \returns The number of IDTEntries
+ */
 uint8_t IDTTable::GetSize()
 {
 	return (this->limit + 1) / sizeof(IDTEntry);
 }
 
+/**
+ * Check if this IDTTable is the currently active one
+ *
+ * \returns true if this IDTTable is the currently active one, false otherwise
+ */
 bool IDTTable::IsActive()
 {
+	// Backup values
 	uint16_t temp_limit = this->limit;
 	IDTEntry *temp_base = this->base;
 
+	// Get the values of the currently active IDTTable
 	asm(
 		"sidt %0 \n"
 		: : "m" (*this)
 	);
 
+	// Compare to backup values
 	bool same = ((this->limit == temp_limit) && (this->base == temp_base));
 
+	// Restore backup values
 	this->limit = temp_limit;
 	this->base = temp_base;
 
 	return same;
 }
 
+/**
+ * Make this IDTTable the currently active one
+ */
 void IDTTable::MakeActive()
 {
+	// Load this IDTTable into IDTR
 	asm(
 		"lidt %0 \n"
 		: : "g" (*this)
 	);
 }
 
+/**
+ * Set the IDTEntry at index index
+ *
+ * This function does simply nothing if index is invalid
+ *
+ * \param index The index of the IDTEntry to be set
+ * \param entry The IDTEntry to be set
+ */
 void IDTTable::SetEntry(uint8_t index, IDTEntry entry)
 {
 	if(index < this->GetSize())
