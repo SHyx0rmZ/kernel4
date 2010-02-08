@@ -38,7 +38,7 @@ TaskManager scheduler(0xE00000, 4000);
 /**
  * Creates a new instance of the kernel
  * 
- * @param multiboot The multiboot information structure the bootloader created
+ * @param multiboot 		The multiboot information structure the bootloader created
  */
 Kernel::Kernel(MultibootInformation multiboot)
 {

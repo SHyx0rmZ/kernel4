@@ -9,7 +9,7 @@ uint64_t freemem = 0; // Amount of free memory
 /**
  * Handle interrupts
  *
- * @param task The TaskState of the current task
+ * @param task 		The TaskState of the current task
  */
 void handle_interrupt(TaskState *task)
 {
