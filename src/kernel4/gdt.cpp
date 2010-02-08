@@ -553,7 +553,8 @@ GDTEntry GDTTable::GetEntry(uint8_t index)
 {
 	if(index >= this->GetSize())
 	{
-		return NULL;
+		GDTEntry *e = NULL;
+		return *e;
 	}
 
 	return this->base[index];
