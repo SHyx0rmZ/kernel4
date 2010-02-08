@@ -23,12 +23,12 @@
 /**
  * Creates a new IDTEntry
  *
- * \param offset The offset to the interrupt service routine
- * \param type The type this IDTEntry represents, either a Interrupt Gate or a Trap
- * \param selector The GDT selector of the code segment the interrupt service routine is in
- * \param ring The privilege level this IDTEntry has
- * \param ist The interrupt stack to use
- * \param present If the IDTEntry is present
+ * @param offset The offset to the interrupt service routine
+ * @param type The type this IDTEntry represents, either a Interrupt Gate or a Trap
+ * @param selector The GDT selector of the code segment the interrupt service routine is in
+ * @param ring The privilege level this IDTEntry has
+ * @param ist The interrupt stack to use
+ * @param present If the IDTEntry is present
  */
 IDTEntry::IDTEntry(uintptr_t offset, IDTType type, uint16_t selector, IDTRing ring, IDTIST ist, bool present)
 {
@@ -50,7 +50,7 @@ IDTEntry::~IDTEntry()
 /**
  * Get the interrupt stack this IDTEntry uses
  *
- * \returns The interrupt stack used by this IDTEntry
+ * @returns The interrupt stack used by this IDTEntry
  */
 IDTIST IDTEntry::GetIST()
 {
@@ -60,7 +60,7 @@ IDTIST IDTEntry::GetIST()
 /**
  * Get the offset to the interrupt service routine
  *
- * \returns The offset to the interrupt service routine
+ * @returns The offset to the interrupt service routine
  */
 uintptr_t IDTEntry::GetOffset()
 {
@@ -70,7 +70,7 @@ uintptr_t IDTEntry::GetOffset()
 /**
  * Get the privilege level of this IDTEntry
  *
- * \returns The privilege level of this IDTEntry
+ * @returns The privilege level of this IDTEntry
  */
 IDTRing IDTEntry::GetRing()
 {
@@ -80,7 +80,7 @@ IDTRing IDTEntry::GetRing()
 /**
  * Get the GDT selector
  *
- * \returns the GDT selector
+ * @returns the GDT selector
  */
 uint16_t IDTEntry::GetSelector()
 {
@@ -90,7 +90,7 @@ uint16_t IDTEntry::GetSelector()
 /**
  * Get the type of this IDTEntry
  *
- * \returns The type of this IDTEntry
+ * @returns The type of this IDTEntry
  */
 IDTType IDTEntry::GetType()
 {
@@ -100,7 +100,7 @@ IDTType IDTEntry::GetType()
 /**
  * Is this IDTEntry present?
  *
- * \returns true if the IDTEntry is present, false otherwise
+ * @returns true if the IDTEntry is present, false otherwise
  */
 bool IDTEntry::IsPresent()
 {
@@ -110,7 +110,7 @@ bool IDTEntry::IsPresent()
 /**
  * Set the interrupt stack
  *
- * \param ist The stack the interrupt routine should use
+ * @param ist The stack the interrupt routine should use
  */
 void IDTEntry::SetIST(IDTIST ist)
 {
@@ -121,7 +121,7 @@ void IDTEntry::SetIST(IDTIST ist)
 /**
  * Set offset to interrupt routine
  *
- * \param offset Offset to interrupt routine
+ * @param offset Offset to interrupt routine
  */
 void IDTEntry::SetOffset(uintptr_t offset)
 {
@@ -133,7 +133,7 @@ void IDTEntry::SetOffset(uintptr_t offset)
 /**
  * Make the IDTEntry present or not present
  *
- * \param present Shall the IDTEntry be marked present?
+ * @param present Shall the IDTEntry be marked present?
  */
 void IDTEntry::SetPresence(bool present)
 {
@@ -144,7 +144,7 @@ void IDTEntry::SetPresence(bool present)
 /**
  * Set the privilege level
  *
- * \param ring The privilege level
+ * @param ring The privilege level
  */
 void IDTEntry::SetRing(IDTRing ring)
 {
@@ -155,7 +155,7 @@ void IDTEntry::SetRing(IDTRing ring)
 /**
  * Set code segment selector
  *
- * \param selector The new code segment selector
+ * @param selector The new code segment selector
  */
 void IDTEntry::SetSelector(uint16_t selector)
 {
@@ -165,7 +165,7 @@ void IDTEntry::SetSelector(uint16_t selector)
 /**
  * Set the interrupt type
  *
- * \param type The interrupt type
+ * @param type The interrupt type
  */
 void IDTEntry::SetType(IDTType type)
 {
@@ -176,9 +176,9 @@ void IDTEntry::SetType(IDTType type)
 /**
  * Compare two IDTEntries
  *
- * \param e1 The first IDTEntry
- * \param e2 The second IDTEntry
- * \returns true if both IDTEntries are equal, false otherwise
+ * @param e1 The first IDTEntry
+ * @param e2 The second IDTEntry
+ * @returns true if both IDTEntries are equal, false otherwise
  */
 bool operator ==(const IDTEntry e1, const IDTEntry e2)
 {
@@ -194,8 +194,8 @@ bool operator ==(const IDTEntry e1, const IDTEntry e2)
 /**
  * Create a new IDTTable
  *
- * \param size The number of IDTEntries that fit into this IDTTable
- * \param position The address of the IDTTable (or rather the IDTEntries)
+ * @param size The number of IDTEntries that fit into this IDTTable
+ * @param position The address of the IDTTable (or rather the IDTEntries)
  */
 IDTTable::IDTTable(uint8_t size, uintptr_t position)
 {
@@ -221,8 +221,8 @@ IDTTable::~IDTTable()
 /**
  * Get an IDTEntry from the IDTTable
  *
- * \param index The index of the IDTEntry
- * \returns The IDTEntry at index index, NULL if index is invalid
+ * @param index The index of the IDTEntry
+ * @returns The IDTEntry at index index, NULL if index is invalid
  */
 IDTEntry IDTTable::GetEntry(uint8_t index)
 {
@@ -237,8 +237,8 @@ IDTEntry IDTTable::GetEntry(uint8_t index)
 /**
  * Get the index of a specific IDTEntry
  *
- * \param entry The IDTEntry to search in the IDTTable
- * \returns The index of the searched IDTEntry, -1 if not found
+ * @param entry The IDTEntry to search in the IDTTable
+ * @returns The index of the searched IDTEntry, -1 if not found
  */
 uint8_t IDTTable::GetIndex(IDTEntry entry)
 {
@@ -256,7 +256,7 @@ uint8_t IDTTable::GetIndex(IDTEntry entry)
 /**
  * Get the number of IDTEntries that fit into this IDTTable
  *
- * \returns The number of IDTEntries
+ * @returns The number of IDTEntries
  */
 uint8_t IDTTable::GetSize()
 {
@@ -266,7 +266,7 @@ uint8_t IDTTable::GetSize()
 /**
  * Check if this IDTTable is the currently active one
  *
- * \returns true if this IDTTable is the currently active one, false otherwise
+ * @returns true if this IDTTable is the currently active one, false otherwise
  */
 bool IDTTable::IsActive()
 {
@@ -307,8 +307,8 @@ void IDTTable::MakeActive()
  *
  * This function does simply nothing if index is invalid
  *
- * \param index The index of the IDTEntry to be set
- * \param entry The IDTEntry to be set
+ * @param index The index of the IDTEntry to be set
+ * @param entry The IDTEntry to be set
  */
 void IDTTable::SetEntry(uint8_t index, IDTEntry entry)
 {

@@ -20,6 +20,7 @@
 #include <console.h>
 #include <string.h>
 
+// TODO: Overload some methods
 uint16_t *Console::video = (uint16_t *)(0xB8000 + 160);
 
 /**
@@ -81,7 +82,7 @@ void Console::Clear()
 /**
  * Get information on what ConsoleArea is currently drawn own
  *
- * \returns The ConsoleArea currently in use
+ * @returns The ConsoleArea currently in use
  */
 ConsoleArea Console::GetArea()
 {
@@ -94,7 +95,7 @@ ConsoleArea Console::GetArea()
  * Note: This will not return 0x7* when ConsoleArea::Top
  * or ConsoleArea::Bottom are in use.
  *
- * \returns The attribute currently in use
+ * @returns The attribute currently in use
  */
 uint8_t Console::GetAttribute()
 {
@@ -104,7 +105,7 @@ uint8_t Console::GetAttribute()
 /**
  * Get the current state
  *
- * \returns The current state
+ * @returns The current state
  */
 ConsoleState Console::GetState()
 {
@@ -114,7 +115,7 @@ ConsoleState Console::GetState()
 /**
  * Set a ConsoleArea to draw on
  *
- * \param area The new ConsoleArea to draw on
+ * @param area The new ConsoleArea to draw on
  */
 void Console::SetArea(ConsoleArea area)
 {
@@ -155,7 +156,7 @@ void Console::SetArea(ConsoleArea area)
 /**
  * Set an attribute to use
  *
- * \param attribute The new attribute byte
+ * @param attribute The new attribute byte
  */
 void Console::SetAttribute(uint8_t attribute)
 {
@@ -165,7 +166,7 @@ void Console::SetAttribute(uint8_t attribute)
 /**
  * Set a new ConsoleState
  *
- * \param state The new ConsoleState
+ * @param state The new ConsoleState
  */
 void Console::SetState(ConsoleState state)
 {
@@ -175,10 +176,10 @@ void Console::SetState(ConsoleState state)
 /**
  * Convert a number into a string, with variable radix
  *
- * \param buffer The buffer to write the string into
- * \param buffersize The size of the buffer
- * \param number The number to convert
- * \param base The radix
+ * @param buffer The buffer to write the string into
+ * @param buffersize The size of the buffer
+ * @param number The number to convert
+ * @param base The radix
  */
 void Console::Convert(char *buffer, uint16_t buffersize, uint64_t number, uint16_t base)
 {
@@ -256,8 +257,8 @@ void Console::Convert(char *buffer, uint16_t buffersize, uint64_t number, uint16
 /**
  * Print a string to the console buffer
  *
- * \param text The string to print
- * \returns A reference to the console
+ * @param text The string to print
+ * @returns A reference to the console
  */
 Console &Console::operator<<(const char *text)
 {
@@ -374,8 +375,8 @@ Console &Console::operator<<(const char *text)
 /**
  * Prints a number to the console buffer
  *
- * \param number The number to print
- * \returns A reference to the console
+ * @param number The number to print
+ * @returns A reference to the console
  */
 Console &Console::operator<<(uint64_t number)
 {
@@ -406,8 +407,8 @@ Console &Console::operator<<(uint64_t number)
 /**
  * Sets a new foreground color
  *
- * \param color The new foreground color
- * \returns A reference to the console
+ * @param color The new foreground color
+ * @returns A reference to the console
  */
 Console &Console::operator<<(ConsoleColor color)
 {
@@ -420,8 +421,8 @@ Console &Console::operator<<(ConsoleColor color)
 /**
  * Set a new ConsoleState
  *
- * \param state The new ConsoleState
- * \returns A reference to the console
+ * @param state The new ConsoleState
+ * @returns A reference to the console
  */
 Console &Console::operator<<(ConsoleState state)
 {
@@ -434,8 +435,8 @@ Console &Console::operator<<(ConsoleState state)
 /**
  * Change the ConsoleArea to draw on
  *
- * \param area The ConsoleArea to draw on
- * \returns A reference to the consoel
+ * @param area The ConsoleArea to draw on
+ * @returns A reference to the consoel
  */
 Console &Console::operator<<(ConsoleArea area)
 {
