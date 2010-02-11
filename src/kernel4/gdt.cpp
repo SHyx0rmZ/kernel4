@@ -22,12 +22,12 @@
 /**
  * Creates a new segment descriptor
  *
- * @param mode 		Which operating mode the segment is for (possible values are: Real Mode, Protected Mode and Long Mode)
- * @param ring 		The privilege ring the segment requests
- * @param base 		The base address of the segment
- * @param limit 		The size of the segment
- * @param granularity 		If set to GDTGranularity::Block, limit gives the size in blocks of 4 KiB
- * @param presence 		If the segment is present or not
+ * @param mode		Which operating mode the segment is for (possible values are: Real Mode, Protected Mode and Long Mode)
+ * @param ring		The privilege ring the segment requests
+ * @param base		The base address of the segment
+ * @param limit		The size of the segment
+ * @param granularity		If set to GDTGranularity::Block, limit gives the size in blocks of 4 KiB
+ * @param presence		If the segment is present or not
  */
 GDTEntry::GDTEntry(GDTMode mode, GDTType type, GDTRing ring, uintptr_t base, uint32_t limit, GDTGranularity granularity, GDTPresence presence)
 {
@@ -60,7 +60,7 @@ GDTEntry::~GDTEntry()
 /**
  * Get the base address of the segment
  *
- * @returns		 The base address of the segment
+ * @returns		The base address of the segment
  */
 uintptr_t GDTEntry::GetBase()
 {
@@ -70,7 +70,7 @@ uintptr_t GDTEntry::GetBase()
 /**
  * Get the granularity of the segment
  *
- * @returns		 The granularity of the segment
+ * @returns		The granularity of the segment
  */
 GDTGranularity GDTEntry::GetGranularity()
 {
@@ -80,7 +80,7 @@ GDTGranularity GDTEntry::GetGranularity()
 /**
  * Get the size of the segment
  *
- * @returns		 The size of the segment
+ * @returns		The size of the segment
  */
 uint32_t GDTEntry::GetLimit()
 {
@@ -90,7 +90,7 @@ uint32_t GDTEntry::GetLimit()
 /**
  * Get the operating mode of the segment
  *
- * @returns		 The operating mode of the segment
+ * @returns		The operating mode of the segment
  */
 GDTMode GDTEntry::GetMode()
 {
@@ -100,7 +100,7 @@ GDTMode GDTEntry::GetMode()
 /**
  * Get the presence of the segment
  *
- * @returns		 If the segment is present or not
+ * @returns		If the segment is present or not
  */
 GDTPresence GDTEntry::GetPresence()
 {
@@ -110,7 +110,7 @@ GDTPresence GDTEntry::GetPresence()
 /**
  * Get the privilege level of the segment
  *
- * @returns		 The privilege level of the segment
+ * @returns		The privilege level of the segment
  */
 GDTRing GDTEntry::GetRing()
 {
@@ -122,7 +122,7 @@ GDTRing GDTEntry::GetRing()
  *
  * Will not return GDTSystemType32::Invalid if called for a 64-Bit segment
  *
- * @returns		 The type of system segment the segment is
+ * @returns		The type of system segment the segment is
  */
 GDTSystemType32 GDTEntry::GetSystemType32()
 {
@@ -139,7 +139,7 @@ GDTSystemType32 GDTEntry::GetSystemType32()
  *
  * Will not return GDTSystemType64::Invalid if called for a 32-Bit segment
  *
- * @returns		 The type of system segment the segment is
+ * @returns		The type of system segment the segment is
  */
 GDTSystemType64 GDTEntry::GetSystemType64()
 {
@@ -154,7 +154,7 @@ GDTSystemType64 GDTEntry::GetSystemType64()
 /**
  * Get the type of the segment
  *
- * @returns		 The type of segment
+ * @returns		The type of segment
  */
 GDTType GDTEntry::GetType()
 {
@@ -175,7 +175,7 @@ GDTType GDTEntry::GetType()
 /**
  * Check if the segment is a code segment
  *
- * @returns		 true if the segment is a code segment, false otherwise
+ * @returns		true if the segment is a code segment, false otherwise
  */
 bool GDTEntry::IsCodeSegment()
 {
@@ -185,7 +185,7 @@ bool GDTEntry::IsCodeSegment()
 /**
  * Check if the segment is a conforming code segment
  *
- * @returns		 true if the segment is a conforming code segment, false otherwise
+ * @returns		true if the segment is a conforming code segment, false otherwise
  */
 bool GDTEntry::IsConforming()
 {
@@ -195,7 +195,7 @@ bool GDTEntry::IsConforming()
 /**
  * Check if the segment is a data segment
  *
- * @returns		 true if the segment is a data segment, false otherwise
+ * @returns		true if the segment is a data segment, false otherwise
  */
 bool GDTEntry::IsDataSegment()
 {
@@ -205,7 +205,7 @@ bool GDTEntry::IsDataSegment()
 /**
  * Check if the segment is an execute only code segment
  *
- * @returns		 true if the segment is an execute only code segment, false otherwise
+ * @returns		true if the segment is an execute only code segment, false otherwise
  */
 bool GDTEntry::IsExecuteOnly()
 {
@@ -215,7 +215,7 @@ bool GDTEntry::IsExecuteOnly()
 /**
  * Check if the segment is an expand down data segment
  *
- * @returns		 true if the segment is an expand down data segment, false otherwise
+ * @returns		true if the segment is an expand down data segment, false otherwise
  */
 bool GDTEntry::IsExpandDown()
 {
@@ -225,7 +225,7 @@ bool GDTEntry::IsExpandDown()
 /**
  * Check if the segment is a read only data segment
  *
- * @returns		 true if the segment is a read only data segment, false otherwise
+ * @returns		true if the segment is a read only data segment, false otherwise
  */
 bool GDTEntry::IsReadOnly()
 {
@@ -235,7 +235,7 @@ bool GDTEntry::IsReadOnly()
 /**
  * Check if the segment is a system segment
  *
- * @returns		 true if the segment is a system segment, false otherwise
+ * @returns		true if the segment is a system segment, false otherwise
  */
 bool GDTEntry::IsSystemSegment()
 {
@@ -245,7 +245,7 @@ bool GDTEntry::IsSystemSegment()
 /**
  * Set the base address of the segment
  *
- * @param address 		The new base address of the segment
+ * @param address		The new base address of the segment
  */
 void GDTEntry::SetBase(uintptr_t address)
 {
@@ -257,8 +257,8 @@ void GDTEntry::SetBase(uintptr_t address)
 /**
  * Set the conforming bit of the segment
  *
- * @param conforming 		Is the conforming bit to be set?
- * @returns		 true if the segment is a code segment and the bit could be set, false otherwise
+ * @param conforming		Is the conforming bit to be set?
+ * @returns		true if the segment is a code segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetConforming(bool conforming)
 {
@@ -276,8 +276,8 @@ bool GDTEntry::SetConforming(bool conforming)
 /**
  * Set the execute only bit of the segment
  *
- * @param executeonly 		Is the execute only bit to be set?
- * @returns		 true if the segment is a code segment and the bit could be set, false otherwise
+ * @param executeonly		Is the execute only bit to be set?
+ * @returns		true if the segment is a code segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetExecuteOnly(bool executeonly)
 {
@@ -295,8 +295,8 @@ bool GDTEntry::SetExecuteOnly(bool executeonly)
 /**
  * Set the expand down bit of the segment
  *
- * @param expanddown 		Is the expand down bit to be set?
- * @returns		 true if the segment is a data segment and the bit could be set, false otherwise
+ * @param expanddown		Is the expand down bit to be set?
+ * @returns		true if the segment is a data segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetExpandDown(bool expanddown)
 {
@@ -316,7 +316,7 @@ bool GDTEntry::SetExpandDown(bool expanddown)
  *
  * If GDTGranularity::Block, limit gives the size of the segment in blocks of 4 KiB, in bytes otherwise
  *
- * @param granularity 		The granularity of the segment
+ * @param granularity		The granularity of the segment
  */
 void GDTEntry::SetGranularity(GDTGranularity granularity)
 {
@@ -327,7 +327,7 @@ void GDTEntry::SetGranularity(GDTGranularity granularity)
 /**
  * Set the size of the segment
  *
- * @param limit 		The new size of the segment
+ * @param limit		The new size of the segment
  */
 void GDTEntry::SetLimit(uint32_t limit)
 {
@@ -339,7 +339,7 @@ void GDTEntry::SetLimit(uint32_t limit)
 /**
  * Set the operating mode of the segment
  *
- * @param mode 		The operating mode of the segment
+ * @param mode		The operating mode of the segment
  */
 void GDTEntry::SetMode(GDTMode mode)
 {
@@ -350,7 +350,7 @@ void GDTEntry::SetMode(GDTMode mode)
 /**
  * Set the presence of the segment
  *
- * @param presence 		The presence of the segment
+ * @param presence		The presence of the segment
  */
 void GDTEntry::SetPresence(GDTPresence presence)
 {
@@ -361,8 +361,8 @@ void GDTEntry::SetPresence(GDTPresence presence)
 /**
  * Set the read only bit of the segment
  *
- * @param readonly 		Is the read only bit to be set?
- * @returns		 true if the segment is a data segment and the bit could be set, false otherwise
+ * @param readonly		Is the read only bit to be set?
+ * @returns		true if the segment is a data segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetReadOnly(bool readonly)
 {
@@ -380,7 +380,7 @@ bool GDTEntry::SetReadOnly(bool readonly)
 /**
  * Set the privilege level of the segment
  *
- * @param ring 		The privilege level of the segment
+ * @param ring		The privilege level of the segment
  */
 void GDTEntry::SetRing(GDTRing ring)
 {
@@ -391,8 +391,8 @@ void GDTEntry::SetRing(GDTRing ring)
 /**
  * Set the system segment type of the segment
  *
- * @param systemtype 		The system segment type of the segment
- * @returns		 true if the segment is a system segment and the bit could be set, false otherwise
+ * @param systemtype		The system segment type of the segment
+ * @returns		true if the segment is a system segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetSystemType(GDTSystemType32 systemtype)
 {
@@ -410,8 +410,8 @@ bool GDTEntry::SetSystemType(GDTSystemType32 systemtype)
 /**
  * Set the system segment type of the segment
  *
- * @param systemtype 		The system segment type of the segment
- * @returns		 true if the segment is a system segment and the bit could be set, false otherwise
+ * @param systemtype		The system segment type of the segment
+ * @returns		true if the segment is a system segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetSystemType(GDTSystemType64 systemtype)
 {
@@ -429,8 +429,8 @@ bool GDTEntry::SetSystemType(GDTSystemType64 systemtype)
 /**
  * Set the system segment type of the segment
  *
- * @param systemtype 		The system segment type of the segment
- * @returns		 true if the segment is a system segment and the bit could be set, false otherwise
+ * @param systemtype		The system segment type of the segment
+ * @returns		true if the segment is a system segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetSystemType32(GDTSystemType32 systemtype)
 {
@@ -448,8 +448,8 @@ bool GDTEntry::SetSystemType32(GDTSystemType32 systemtype)
 /**
  * Set the system segment type of the segment
  *
- * @param systemtype 		The system segment type of the segment
- * @returns		 true if the segment is a system segment and the bit could be set, false otherwise
+ * @param systemtype		The system segment type of the segment
+ * @returns		true if the segment is a system segment and the bit could be set, false otherwise
  */
 bool GDTEntry::SetSystemType64(GDTSystemType64 systemtype)
 {
@@ -467,7 +467,7 @@ bool GDTEntry::SetSystemType64(GDTSystemType64 systemtype)
 /**
  * Set the type of the segment
  *
- * @param type 		The type of the segment
+ * @param type		The type of the segment
  */
 void GDTEntry::SetType(GDTType type)
 {
@@ -488,7 +488,7 @@ void GDTEntry::SetType(GDTType type)
 /**
  * Check if two GDTEntries are the same
  *
- * @returns		 true if both GDTEntries are the same, false otherwise
+ * @returns		true if both GDTEntries are the same, false otherwise
  */
 bool operator ==(GDTEntry e1, GDTEntry e2)
 {
@@ -522,8 +522,8 @@ bool operator ==(GDTEntry e1, GDTEntry e2)
 /**
  * Creates a new GDT (or rather, a structure to manage it)
  * 
- * @param size 		The number of entries the GDTTable can hold
- * @param position 		A pointer to a GDTEntry array
+ * @param size		The number of entries the GDTTable can hold
+ * @param position		A pointer to a GDTEntry array
  */
 GDTTable::GDTTable(uint8_t size, uintptr_t position)
 {
@@ -546,8 +546,8 @@ GDTTable::~GDTTable()
 /**
  * Get a GDTEntry at a specific index
  *
- * @param The 		index of the GDTEntry
- * @returns		 The GDTEntry indexed by index, NULL if index is invalid
+ * @param The		index of the GDTEntry
+ * @returns		The GDTEntry indexed by index, NULL if index is invalid
  */
 GDTEntry GDTTable::GetEntry(uint8_t index)
 {
@@ -563,8 +563,8 @@ GDTEntry GDTTable::GetEntry(uint8_t index)
 /**
  * Get the index of a GDTEntry
  *
- * @param The 		GDTEntry to get the index of
- * @returns		 The index of the GDTEntry represented by entry if found, 0 otherwise
+ * @param The		GDTEntry to get the index of
+ * @returns		The index of the GDTEntry represented by entry if found, 0 otherwise
  */
 uint8_t GDTTable::GetIndex(GDTEntry entry)
 {
@@ -582,7 +582,7 @@ uint8_t GDTTable::GetIndex(GDTEntry entry)
 /**
  * Get the size of the GDTTable
  *
- * @returns		 The size of the GDTTable
+ * @returns		The size of the GDTTable
  */
 uint8_t GDTTable::GetSize()
 {
@@ -626,8 +626,8 @@ void GDTTable::MakeActive()
 /**
  * Reload a segment register
  *
- * @param segment 		The segment register to reload
- * @param index 		The index of the GDTEntry to reload the segment register with
+ * @param segment		The segment register to reload
+ * @param index		The index of the GDTEntry to reload the segment register with
  */
 void GDTTable::ReloadSegment(GDTSegmentRegister segment, uint8_t index)
 {
@@ -678,8 +678,8 @@ void GDTTable::ReloadSegment(GDTSegmentRegister segment, uint8_t index)
 /**
  * Set the GDTEntry indexed by index
  *
- * @param index 		The index of the GDTEntry
- * @param entry 		The new value of the GDTEntry indexed by index
+ * @param index		The index of the GDTEntry
+ * @param entry		The new value of the GDTEntry indexed by index
  */
 void GDTTable::SetEntry(uint8_t index, GDTEntry entry)
 {

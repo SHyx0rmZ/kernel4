@@ -9,7 +9,7 @@ uint64_t freemem = 0; // Amount of free memory
 /**
  * Handle interrupts
  *
- * @param task 		The TaskState of the current task
+ * @param task		The TaskState of the current task
  */
 void handle_interrupt(TaskState *task)
 {
@@ -55,7 +55,7 @@ void handle_interrupt(TaskState *task)
 	}
 	else
 	{
-		console << ConsoleColor::Red << "OMGWTFBBQ?! The kernel encountered an exception and cannot continue execution!";
+		console << ConsoleColor::Red << "\r\nOMGWTFBBQ?! The kernel encountered an exception and cannot continue execution!";
 
 		while(1) { asm("hlt"); }
 	}
