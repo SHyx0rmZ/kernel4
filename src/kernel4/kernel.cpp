@@ -32,7 +32,7 @@ Console console;
 //MemoryStack memoryb(0x1000000);
 //MemoryStack memory(0x1100000);
 MemoryManager memory;
-PagingManager pages(0xF00000);
+PagingManager paging(0xF00000);
 TaskManager scheduler(0xE00000, 4000);
 extern void test();
 /**
@@ -202,18 +202,18 @@ Kernel::Kernel(MultibootInformation multiboot)
 	out8(0x40, (timer_divisor >> 8));
 	
 	// Enable Interrupts (Taskswitchs)
-	asm("sti");
+//	asm("sti");
 
 	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
 	console << "Entering endless loop...\r\n";
+
+	test();
 
 	// Idle
 	while(1)
 	{
 		asm("hlt");
 	}
-
-	test();
 }
 
 /**

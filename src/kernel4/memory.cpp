@@ -20,6 +20,7 @@
 #include <stddef.h>
 #include <memory.h>
 #include <console.h>
+#include <managers.h>
 
 extern const uintptr_t start_kernel;
 extern const uintptr_t end_kernel;
@@ -51,7 +52,7 @@ uintptr_t MemoryStack::Pop()
 		return NULL;
 	}
 
-	return this->stack[size--];
+	return this->stack[--size];
 }
 
 void MemoryStack::Push(uintptr_t block)
@@ -89,6 +90,8 @@ void MemoryManager::VFree(uintptr_t address)
 {
 	//TODO: Replace with actual function
 	//address = NULL;
+	paging.UnMap(address);
+
 	this->PFree(address);
 	address = NULL;
 }
@@ -97,7 +100,11 @@ uintptr_t MemoryManager::VAlloc()
 {
 	//TODO: Replace with actual function
 	//return NULL;
-	return this->PAlloc();
+	uintptr_t address = this->PAlloc();
+
+	paging.Map(address, address);
+
+	return address;
 }
 
 void MemoryManager::Initialize(uintptr_t address, uint64_t length)

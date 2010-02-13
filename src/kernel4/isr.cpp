@@ -24,6 +24,8 @@ void handle_interrupt(TaskState *task)
 
 			break;
 		// IRQ 0
+		case 14:
+			while(1);
 		case 32:
 			timer += 1000;
 
