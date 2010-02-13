@@ -87,12 +87,17 @@ uint64_t MemoryManager::GetAvailableMemory()
 
 void MemoryManager::VFree(uintptr_t address)
 {
+	//TODO: Replace with actual function
+	//address = NULL;
+	this->PFree(address);
 	address = NULL;
 }
 
 uintptr_t MemoryManager::VAlloc()
 {
-	return NULL;
+	//TODO: Replace with actual function
+	//return NULL;
+	return this->PAlloc();
 }
 
 void MemoryManager::Initialize(uintptr_t address, uint64_t length)

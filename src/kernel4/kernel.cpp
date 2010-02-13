@@ -34,7 +34,7 @@ Console console;
 MemoryManager memory;
 PagingManager pages(0xF00000);
 TaskManager scheduler(0xE00000, 4000);
-
+extern void test();
 /**
  * Creates a new instance of the kernel
  * 
@@ -212,6 +212,8 @@ Kernel::Kernel(MultibootInformation multiboot)
 	{
 		asm("hlt");
 	}
+
+	test();
 }
 
 /**
