@@ -16,6 +16,7 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <config.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <memory.h>
@@ -109,10 +110,13 @@ uintptr_t MemoryManager::VAlloc()
 
 void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 {
+
+#if PAGESIZE == 4
+
 	uintptr_t bs = ((address + 0x0FFF) & ~0xFFF);
 	uintptr_t be = ((address + length) & ~0xFFF);
 
-	if(bs < start_kernel && be > end_kernel)
+	if((bs < start_kernel && be < start_kernel) || (bs > end_kernel && be > end_kernel))
 	{
 		while(bs < be && (be - bs) >= 0x1000)
 		{
@@ -125,7 +129,7 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 	{
 		while(bs < be && (be - bs) >= 0x1000)
 		{
-			if(bs < start_kernel && (bs + 0x1000) > end_kernel)
+			if((bs < start_kernel && (bs + 0x1000) < start_kernel) || (bs > end_kernel && (bs + 0x1000) > end_kernel))
 			{
 				this->PFree(bs);
 			}
@@ -133,6 +137,36 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 			bs += 0x1000;
 		}
 	}
+
+#elif PAGESIZE == 2
+
+	uintptr_t bs = ((address + 0x1FFFFF) & ~0x1FFFFF);
+	uintptr_t be = ((address + length) & ~0x1FFFFF);
+
+	if((bs < start_kernel && be < start_kernel) || (bs > end_kernel && be > end_kernel))
+	{
+		while(bs < be && (be - bs) >= 0x200000)
+		{
+			this->PFree(bs);
+
+			bs += 0x200000;
+		}
+	}
+	else
+	{
+		while(bs < be && (be - bs) >= 0x200000)
+		{
+			if((bs < start_kernel && (bs + 0x200000) < start_kernel) || (bs > end_kernel && (bs + 0x200000) > end_kernel))
+			{
+				this->PFree(bs);
+			}
+
+			bs += 0x200000;
+		}
+	}
+
+#endif
+
 }
 
 void MemoryManager::PFree(uintptr_t block)
