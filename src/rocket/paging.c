@@ -47,6 +47,15 @@ uint64_t *paging_initialize()
 	*pd9 = 0x100018FLL;
 	*pd0 = 0x120018FLL;
 
+	uint64_t *pml4ex = (uint64_t *)0x300FF8LL;
+	*pml4ex = 0x30300BLL;
+	uint64_t *pdpex = (uint64_t *)0x303FF8LL;
+	*pdpex = 0x30400BLL;
+	uint64_t *pdx = (uint64_t *)0x304FF8LL;
+	*pdx = 0x30500BLL;
+	uint64_t *ptx = (uint64_t *)0x305FF8LL;
+	*ptx = 0x30018FLL;
+
 	return (uint64_t *)0x300000LL;
 }
 

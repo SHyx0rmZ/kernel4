@@ -94,10 +94,12 @@ class PagingManager
 
 		void UnMap(uintptr_t virtual_address);
 		void Map(uintptr_t virtual_address, uintptr_t physical_address);
+		void Load();
 
 	private:
 		PageMapLevel4Entry *page_map_level_4;
 		uint16_t pml4i, pdpi, pdi, pti;
+		PageTableEntry *dynamic_page;
 
 		void UpdateIndexes(uintptr_t address);
 };
