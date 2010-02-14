@@ -17,5 +17,4 @@
  */
 
 // Set the size of a page 4: 4096 KiB; 2: 2 MiB; 1: 1 GiB (unsupported on most CPUs!)
-#define PAGESIZE 2
-
+#define PAGESIZE 4

@@ -83,6 +83,7 @@ class PageDirectoryEntry : public PagingStructure
 class PageTableEntry : public PagingStructure
 {
 	public:
+		void Clear();
 		PageTableEntry();
 		~PageTableEntry();
 };
@@ -96,12 +97,14 @@ class PagingManager
 		void UnMap(uintptr_t virtual_address);
 		void Map(uintptr_t virtual_address, uintptr_t physical_address);
 		void Load();
+		void Invalidate(uintptr_t virtual_address);
+		void Invalidate(PagingStructure *page);
 
 	private:
 		PageMapLevel4Entry *page_map_level_4;
 		uint16_t pml4i, pdpi, pdi, pti;
 		PageTableEntry *dynamic_page;
-		uintptr_t static_pointer;
+		PagingStructure *static_pointer;
 
 		void UpdateIndexes(uintptr_t address);
 };
