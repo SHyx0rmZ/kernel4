@@ -84,7 +84,16 @@ MemoryManager::~MemoryManager()
 
 uint64_t MemoryManager::GetAvailableMemory()
 {
+
+#if PAGESIZE == 4
+
 	return memory.GetSize() * 0x1000;
+
+#elif PAGESIZE == 2
+
+	return memory.GetSize() * 0x200000;
+
+#endif
 }
 
 void MemoryManager::VFree(uintptr_t address)

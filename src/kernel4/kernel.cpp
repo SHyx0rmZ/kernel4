@@ -45,7 +45,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	console.Clear();
 
 	// Wonderful TUI
-	console << ConsoleArea::Top << ConsoleColor::DarkGray << "ASXSoft " << ConsoleColor::Blue << "Nuke " << ConsoleColor::DarkGray << "- " << ConsoleColor::Blue << "Version 0.4" << ConsoleColor::Gray << ConsoleArea::Middle;
+	console << ConsoleArea::Top << ConsoleColor::DarkGray << "ASXSoft " << ConsoleColor::Blue << "Nuke " << ConsoleColor::DarkGray << "- " << ConsoleColor::Blue << "Version kernel4-0.0.0" << ConsoleColor::Gray << ConsoleArea::Middle;
 
 	console << "Initializing memory pool...\r\n";
 
@@ -81,7 +81,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 		// If it is free memory, add it to the memory ppol
 		if(memstart->type == MultibootMemoryType::Available)
 		{
-			console << ConsoleColor::Green << " OK\r\n" << ConsoleColor::Gray;
+			console << ConsoleColor::Green << " WRIN\r\n" << ConsoleColor::Gray;
 
 			memory.Initialize(memstart->address, memstart->length);
 		}
@@ -116,7 +116,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	gdt.ReloadSegment(GDTSegmentRegister::GS, 0);
 	gdt.ReloadSegment(GDTSegmentRegister::SS, 2);
 
-	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
+	console << ConsoleColor::Green << "WRIN\r\n" << ConsoleColor::Gray;
 	console << "Intializing IDT... ";
 
 	// TODO: Replace address with new()
@@ -172,7 +172,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	// Load IDT
 	idt.MakeActive();
 
-	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
+	console << ConsoleColor::Green << "WRIN\r\n" << ConsoleColor::Gray;
 	console << "Remapping IRQs... ";
 
 	// Initialize the PIC
@@ -191,7 +191,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	out8(0x21, 0x00); // Masking
 	out8(0xA1, 0x00); // Masking
 
-	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
+	console << ConsoleColor::Green << "WRIN\r\n" << ConsoleColor::Gray;
 	console << "Enabling interrupts... ";
 
 	// Set a new frequency for IRQ 0
@@ -202,9 +202,9 @@ Kernel::Kernel(MultibootInformation multiboot)
 	out8(0x40, (timer_divisor >> 8));
 	
 	// Enable Interrupts (Taskswitchs)
-//	asm("sti");
+	//asm("sti");
 
-	console << ConsoleColor::Green << "OK\r\n" << ConsoleColor::Gray;
+	console << ConsoleColor::Green << "WRIN\r\n" << ConsoleColor::Gray;
 	console << "Entering endless loop...\r\n";
 
 	/*paging.Map(0x00000000, 0x00000000);
@@ -221,6 +221,8 @@ Kernel::Kernel(MultibootInformation multiboot)
 	paging.Load();
 
 	test();
+
+	asm("sti");
 
 	// Idle
 	while(1)

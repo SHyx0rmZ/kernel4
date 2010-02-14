@@ -25,7 +25,8 @@
 PagingManager::PagingManager(uintptr_t address)
 {
 	this->page_map_level_4 = (PageMapLevel4Entry *)address;	
-	this->dynamic_page = (PageTableEntry *)0xFFFFFFFFFFFFF000LL;
+	this->dynamic_page = (PageTableEntry *)0x305FF8LL;
+	this->static_pointer = 0xFFFFFFFFFFFFF000LL;
 }
 
 PagingManager::~PagingManager()
@@ -53,10 +54,16 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 {
 	this->UpdateIndexes(virtual_address & 0x000FFFFFFFFFF000LL);
 
-	this->dynamic_page->SetAddress(page_map_level_4[pml4i].GetAddress());
+	//this->dynamic_page->SetAddress(page_map_level_4[pml4i].GetAddress());
+	this->dynamic_page->SetAddress((uintptr_t)page_map_level_4);
+
+	asm(
+		"invlpg %0 \n"
+		: : "m" (*(char *)this->static_pointer)
+	);
 
 	//PageMapLevel4Entry *pml4e = (PageMapLevel4Entry *)(page_map_level_4[pml4i].GetAddress());
-	PageMapLevel4Entry *pml4e = (PageMapLevel4Entry *)(0xFFFFFFFFFFFFF000LL + pml4i * sizeof(PageMapLevel4Entry));
+	PageMapLevel4Entry *pml4e = (PageMapLevel4Entry *)(this->static_pointer + pml4i * sizeof(PageMapLevel4Entry));
 
 	if(pml4e->IsPresent() == false)
 	{
@@ -65,13 +72,17 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 		pml4e->SetAddress(memory.PAlloc());
 		pml4e->SetCachability(PageCachability::WriteThroughCachable);
 		pml4e->SetPresence(true);
-
 	}
 
-	this->dynamic_page->SetAddress(pml4e[pdpi].GetAddress());
+	this->dynamic_page->SetAddress(pml4e->GetAddress());
+
+	asm(
+		"invlpg %0 \n"
+		: : "m" (*(char *)this->static_pointer)
+	);
 
 	//PageDirectoryPointerEntry *pdpe = (PageDirectoryPointerEntry *)(pml4e[pdpi].GetAddress());
-	PageDirectoryPointerEntry *pdpe = (PageDirectoryPointerEntry *)(0xFFFFFFFFFFFFF000LL + pdpi * sizeof(PageMapLevel4Entry));
+	PageDirectoryPointerEntry *pdpe = (PageDirectoryPointerEntry *)(this->static_pointer + pdpi * sizeof(PageDirectoryPointerEntry));
 
 	if(pdpe->IsPresent() == false)
 	{
@@ -83,7 +94,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 	}
 
 #if PAGESIZE == 4
-
+//FIXME:
 	PageDirectoryEntry *pde = (PageDirectoryEntry *)(pdpe[pdi].GetAddress());
 
 	if(pde->IsPresent() == false)
@@ -110,10 +121,15 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 
 #elif PAGESIZE == 2
 
-	this->dynamic_page->SetAddress(pdpe[pdi].GetAddress());
+	this->dynamic_page->SetAddress(pdpe->GetAddress());
+
+	asm(
+		"invlpg %0 \n"
+		: : "m" (*(char *)this->static_pointer)
+	);
 
 	//PageDirectoryEntry *pde = (PageDirectoryEntry *)(pdpe[pdi].GetAddress());
-	PageDirectoryEntry *pde = (PageDirectoryEntry *)(0xFFFFFFFFFFFFF000LL + pdi * sizeof(PageDirectoryEntry)); 
+	PageDirectoryEntry *pde = (PageDirectoryEntry *)(this->static_pointer + pdi * sizeof(PageDirectoryEntry)); 
 
 	pde->Clear();
 	pde->SetAccess(PageAccess::UserWritable);
@@ -123,7 +139,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 
 	asm(
 		"invlpg %0 \n"
-		: : "g" (virtual_address)
+		: : "m" (*(char *)virtual_address)
 	);
 
 #endif
@@ -224,7 +240,6 @@ void PagingStructure::SetAddress(uintptr_t address)
 	this->information &= 0xFFF0000000000FFF;
 	this->information |= (~0xFFF0000000000FFF & address);
 
-	asm("invlpg %0 \n" : : "g" (*this));
 	//asm("invlpg %0 \n" : : "g" (address));
 }
 
@@ -258,11 +273,27 @@ PageDirectoryPointerEntry::~PageDirectoryPointerEntry()
 
 PageDirectoryEntry::PageDirectoryEntry() : PagingStructure()
 {
+
+#if PAGESIZE == 2
+
+	this->information = 0x80;
+
+#endif
+
 }
 
 PageDirectoryEntry::~PageDirectoryEntry()
 {
 }
+
+#if PAGESIZE == 2
+
+void PageDirectoryEntry::Clear()
+{
+	this->information = 0x80;
+}
+
+#endif
 
 PageTableEntry::PageTableEntry()
 {

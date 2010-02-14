@@ -75,6 +75,7 @@ class PageDirectoryPointerEntry : public PagingStructure
 class PageDirectoryEntry : public PagingStructure
 {
 	public:
+		void Clear();
 		PageDirectoryEntry();
 		~PageDirectoryEntry();
 };
@@ -100,6 +101,7 @@ class PagingManager
 		PageMapLevel4Entry *page_map_level_4;
 		uint16_t pml4i, pdpi, pdi, pti;
 		PageTableEntry *dynamic_page;
+		uintptr_t static_pointer;
 
 		void UpdateIndexes(uintptr_t address);
 };
