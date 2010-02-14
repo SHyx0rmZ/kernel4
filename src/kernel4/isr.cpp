@@ -24,8 +24,6 @@ void handle_interrupt(TaskState *task)
 
 			break;
 		// IRQ 0
-		case 14:
-			while(1);
 		case 32:
 			timer += 1000;
 
@@ -57,7 +55,18 @@ void handle_interrupt(TaskState *task)
 	}
 	else
 	{
-		console << ConsoleColor::Red << "\r\nOMGWTFBBQ?! The kernel encountered an exception and cannot continue execution!";
+		console << ConsoleColor::Red << "\r\nOMGWTFBBQ?! The kernel encountered an exception and cannot continue execution!" << ConsoleColor::Blue << "\r\nRegister Dump:";
+		console	<< ConsoleState::HexFixed;
+		console << ConsoleColor::Blue << "\r\n    SS: " << ConsoleColor::Gray << task->rsp << ConsoleColor::Blue << "    RSP: " << ConsoleColor::Gray << task->rsp << ConsoleColor::Blue << " RFLAGS: " << ConsoleColor::Gray << task->rflags;
+		console << ConsoleColor::Blue << "\r    CS: " << ConsoleColor::Gray << task->cs << ConsoleColor::Blue << "    RIP: " << ConsoleColor::Gray << task->rip;
+		console << ConsoleColor::Blue << "\r\n   INT: " << ConsoleColor::Gray << task->interrupt << ConsoleColor::Blue << "  ERROR: " << ConsoleColor::Gray << task->error;
+		console << ConsoleColor::Blue << "\r\n    DS: " << ConsoleColor::Gray << task->ds << ConsoleColor::Blue << "     ES: " << ConsoleColor::Gray << task->es;
+		console << ConsoleColor::Blue << "\r\n    FS: " << ConsoleColor::Gray << task->fs << ConsoleColor::Blue << "     GS: " << ConsoleColor::Gray << task->gs;
+		console << ConsoleColor::Blue << "\r\n   RAX: " << ConsoleColor::Gray << task->rax << ConsoleColor::Blue << "    RBX: " << ConsoleColor::Gray << task->rbx << ConsoleColor::Blue << "    RCX: " << ConsoleColor::Gray << task->rcx;
+		console << ConsoleColor::Blue << "\r   RDX: " << ConsoleColor::Gray << task->rdx << ConsoleColor::Blue << "    RDI: " << ConsoleColor::Gray << task->rdi << ConsoleColor::Blue << "    RSI: " << ConsoleColor::Gray << task->rsi;
+		console << ConsoleColor::Blue << "\r   RBP: " << ConsoleColor::Gray << task->rbp << ConsoleColor::Blue << "     R8: " << ConsoleColor::Gray << task->r8 << ConsoleColor::Blue << "     R9: " << ConsoleColor::Gray << task->r9;
+		console << ConsoleColor::Blue << "\r   R10: " << ConsoleColor::Gray << task->r10 << ConsoleColor::Blue << "    R11: " << ConsoleColor::Gray << task->r10 << ConsoleColor::Blue << "    R12: " << ConsoleColor::Gray << task->r12;
+		console << ConsoleColor::Blue << "\r   R13: " << ConsoleColor::Gray << task->r13 << ConsoleColor::Blue << "    R14: " << ConsoleColor::Gray << task->r14 << ConsoleColor::Blue << "    R15: " << ConsoleColor::Gray << task->r15;
 
 		while(1) { asm("hlt"); }
 	}
