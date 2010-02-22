@@ -12,6 +12,10 @@ void test()
 
 void *operator new(size_t size)
 {
+	asm(
+		"mov 8(%rbp), %r10 \n"
+	);
+
 	size = size;
 
 	return (void *)memory.VAlloc();
