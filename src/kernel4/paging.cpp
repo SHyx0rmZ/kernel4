@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <paging.h>
 #include <managers.h>
+#include <string.h>
 
 PagingManager::PagingManager(uintptr_t address)
 {
@@ -72,11 +73,20 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 		pml4e->SetAddress(memory.PAlloc());
 		pml4e->SetCachability(PageCachability::WriteThroughCachable);
 		pml4e->SetPresence(true);
+
+		this->dynamic_page->SetAddress(pml4e->GetAddress());
+
+		this->Invalidate(this->static_pointer);
+
+		//FIXME: Isn't mapped, so it will generate an Pagefault >.<
+		memset((void *)0xFFFFFFFFFFFFF000LL, 0, 4096);
 	}
+	else
+	{
+		this->dynamic_page->SetAddress(pml4e->GetAddress());
 
-	this->dynamic_page->SetAddress(pml4e->GetAddress());
-
-	this->Invalidate(this->static_pointer);
+		this->Invalidate(this->static_pointer);
+	}
 
 	PageDirectoryPointerEntry *pdpe = (PageDirectoryPointerEntry *)(&this->static_pointer[pdpi]);
 
@@ -87,13 +97,21 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 		pdpe->SetAddress(memory.PAlloc());
 		pdpe->SetCachability(PageCachability::WriteThroughCachable);
 		pdpe->SetPresence(true);
+
+		this->dynamic_page->SetAddress(pdpe->GetAddress());
+
+		this->Invalidate(this->static_pointer);
+
+		memset((void *)0xFFFFFFFFFFFFF000LL, 0, 4096);
+	}
+	else
+	{
+		this->dynamic_page->SetAddress(pdpe->GetAddress());
+
+		this->Invalidate(this->static_pointer);
 	}
 
 #if PAGESIZE == 4
-
-	this->dynamic_page->SetAddress(pdpe->GetAddress());
-
-	this->Invalidate(this->static_pointer);
 
 	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]);
 
@@ -104,11 +122,19 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 		pde->SetAddress(memory.PAlloc());
 		pde->SetCachability(PageCachability::WriteThroughCachable);
 		pde->SetPresence(true);
+
+		this->dynamic_page->SetAddress(pde->GetAddress());
+
+		this->Invalidate(this->static_pointer);
+
+		memset((void *)0xFFFFFFFFFFFFF000LL, 0, 4096);
 	}
+	else
+	{
+		this->dynamic_page->SetAddress(pde->GetAddress());
 
-	this->dynamic_page->SetAddress(pde->GetAddress());
-
-	this->Invalidate(this->static_pointer);
+		this->Invalidate(this->static_pointer);
+	}
 
 	PageTableEntry *pte = (PageTableEntry *)(&this->static_pointer[pti]);
 
@@ -124,10 +150,6 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 	);
 
 #elif PAGESIZE == 2
-
-	this->dynamic_page->SetAddress(pdpe->GetAddress());
-
-	this->Invalidate(this->static_pointer);
 
 	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]); 
 
@@ -326,7 +348,7 @@ PageTableEntry::PageTableEntry()
 
 #if PAGESIZE == 4
 
-	this->information = 0x80;
+	this->information = 0x00;
 
 #endif
 
@@ -341,7 +363,7 @@ void PageTableEntry::Clear()
 
 #if PAGESIZE == 4
 
-	this->information = 0x80;
+	this->information = 0x00;
 
 #endif
 
