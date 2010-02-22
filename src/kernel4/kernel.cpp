@@ -27,14 +27,15 @@
 #include <managers.h>
 #include <idt.h>
 #include <isr.h>
+#include <config.h>
 
 Console console;
-//MemoryStack memoryb(0x1000000);
-//MemoryStack memory(0x1100000);
 MemoryManager memory;
 PagingManager paging(0x300000);
 TaskManager scheduler(0xE00000, 4000);
+
 extern void test();
+
 /**
  * Creates a new instance of the kernel
  * 
@@ -45,7 +46,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	console.Clear();
 
 	// Wonderful TUI
-	console << ConsoleArea::Top << ConsoleColor::DarkGray << "ASXSoft " << ConsoleColor::Blue << "Nuke " << ConsoleColor::DarkGray << "- " << ConsoleColor::Blue << "Version kernel4-0.0.0" << ConsoleColor::Gray << ConsoleArea::Middle;
+	console << ConsoleArea::Top << ConsoleColor::DarkGray << "ASXSoft " << ConsoleColor::Blue << "Nuke " << ConsoleColor::DarkGray << "- " << ConsoleColor::Blue << "Version " << NUKE_VERSION << ConsoleColor::Gray << ConsoleArea::Middle;
 
 	console << "Initializing memory pool...\r\n";
 
@@ -220,7 +221,7 @@ Kernel::Kernel(MultibootInformation multiboot)
 	paging.Map(0xFFFFFFFFFFFFF000LL, 0x00F00000);*/
 	paging.Load();
 
-	test();
+	//test();
 
 	asm("sti");
 

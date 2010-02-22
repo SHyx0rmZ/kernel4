@@ -46,8 +46,9 @@ void PagingManager::Load()
 void PagingManager::Invalidate(uintptr_t virtual_address)
 {
 	asm(
+		"mov %%rbx, %%r13 \n"
 		"invlpg %0 \n"
-		: : "m" (*(char *)virtual_address)
+		: : "m" (*(char *)virtual_address), "b" (virtual_address)
 	);
 }
 
@@ -58,6 +59,12 @@ void PagingManager::Invalidate(PagingStructure *page)
 
 void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 {
+	asm(
+		"mov %%rax, %%r14 \n"
+		"mov %%rbx, %%r15 \n"
+		: : "a" (virtual_address), "b" (physical_address)
+	);
+
 	this->UpdateIndexes(virtual_address & 0x000FFFFFFFFFF000LL);
 
 	this->dynamic_page->SetAddress((uintptr_t)page_map_level_4);
@@ -348,7 +355,7 @@ PageTableEntry::PageTableEntry()
 
 #if PAGESIZE == 4
 
-	this->information = 0x00;
+	//this->information = 0x80;
 
 #endif
 
@@ -363,7 +370,7 @@ void PageTableEntry::Clear()
 
 #if PAGESIZE == 4
 
-	this->information = 0x00;
+	//this->information = 0x80;
 
 #endif
 
