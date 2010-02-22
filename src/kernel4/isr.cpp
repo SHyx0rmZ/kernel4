@@ -57,14 +57,30 @@ void handle_interrupt(TaskState *task)
 	}
 	else
 	{
+		uint64_t cr0, cr2, cr3, cr4, cr8;
+
+		asm(
+			"mov %%cr0, %%rax \n"
+			"mov %%rax, %0 \n"
+			"mov %%cr2, %%rax \n"
+			"mov %%rax, %1 \n"
+			"mov %%cr3, %%rax \n"
+			"mov %%rax, %2 \n"
+			"mov %%cr4, %%rax \n"
+			"mov %%rax, %3 \n"
+			"mov %%cr8, %%rax \n"
+			"mov %%rax, %4 \n"
+			: "=g" (cr0), "=g" (cr2), "=g" (cr3), "=g" (cr4), "=g" (cr8)
+		);
+
 		console << ConsoleColor::Red << "\r\nOMGWTFBBQ?! The kernel encountered an exception and cannot continue execution!" << ConsoleColor::Blue << "\r\nRegister Dump:";
 		console	<< ConsoleState::HexFixed;
 		console << ConsoleColor::Blue << "\r\n    SS: " << ConsoleColor::Gray << task->rsp << ConsoleColor::Blue << "    RSP: " << ConsoleColor::Gray << task->rsp << ConsoleColor::Blue << " RFLAGS: " << ConsoleColor::Gray << task->rflags;
-		console << ConsoleColor::Blue << "\r    CS: " << ConsoleColor::Gray << task->cs << ConsoleColor::Blue << "    RIP: " << ConsoleColor::Gray << task->rip;
-		console << ConsoleColor::Blue << "\r\n   INT: " << ConsoleColor::Gray << task->interrupt << ConsoleColor::Blue << "  ERROR: " << ConsoleColor::Gray << task->error;
-		console << ConsoleColor::Blue << "\r\n    DS: " << ConsoleColor::Gray << task->ds << ConsoleColor::Blue << "     ES: " << ConsoleColor::Gray << task->es;
-		console << ConsoleColor::Blue << "\r\n    FS: " << ConsoleColor::Gray << task->fs << ConsoleColor::Blue << "     GS: " << ConsoleColor::Gray << task->gs;
-		console << ConsoleColor::Blue << "\r\n   RAX: " << ConsoleColor::Gray << task->rax << ConsoleColor::Blue << "    RBX: " << ConsoleColor::Gray << task->rbx << ConsoleColor::Blue << "    RCX: " << ConsoleColor::Gray << task->rcx;
+		console << ConsoleColor::Blue << "\r    CS: " << ConsoleColor::Gray << task->cs << ConsoleColor::Blue << "    RIP: " << ConsoleColor::Gray << task->rip << ConsoleColor::Blue << "    CR0: " << ConsoleColor::Gray << cr0;
+		console << ConsoleColor::Blue << "\r   INT: " << ConsoleColor::Gray << task->interrupt << ConsoleColor::Blue << "  ERROR: " << ConsoleColor::Gray << task->error << ConsoleColor::Blue << "    CR2: " << ConsoleColor::Gray << cr2;
+		console << ConsoleColor::Blue << "\r    DS: " << ConsoleColor::Gray << task->ds << ConsoleColor::Blue << "     ES: " << ConsoleColor::Gray << task->es << ConsoleColor::Blue << "    CR3: " << ConsoleColor::Gray << cr3;
+		console << ConsoleColor::Blue << "\r    FS: " << ConsoleColor::Gray << task->fs << ConsoleColor::Blue << "     GS: " << ConsoleColor::Gray << task->gs << ConsoleColor::Blue << "    CR4: " << ConsoleColor::Gray << cr4;
+		console << ConsoleColor::Blue << "\r   RAX: " << ConsoleColor::Gray << task->rax << ConsoleColor::Blue << "    RBX: " << ConsoleColor::Gray << task->rbx << ConsoleColor::Blue << "    RCX: " << ConsoleColor::Gray << task->rcx;
 		console << ConsoleColor::Blue << "\r   RDX: " << ConsoleColor::Gray << task->rdx << ConsoleColor::Blue << "    RDI: " << ConsoleColor::Gray << task->rdi << ConsoleColor::Blue << "    RSI: " << ConsoleColor::Gray << task->rsi;
 		console << ConsoleColor::Blue << "\r   RBP: " << ConsoleColor::Gray << task->rbp << ConsoleColor::Blue << "     R8: " << ConsoleColor::Gray << task->r8 << ConsoleColor::Blue << "     R9: " << ConsoleColor::Gray << task->r9;
 		console << ConsoleColor::Blue << "\r   R10: " << ConsoleColor::Gray << task->r10 << ConsoleColor::Blue << "    R11: " << ConsoleColor::Gray << task->r10 << ConsoleColor::Blue << "    R12: " << ConsoleColor::Gray << task->r12;
