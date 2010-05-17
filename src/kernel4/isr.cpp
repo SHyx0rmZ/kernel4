@@ -85,6 +85,13 @@ void handle_interrupt(TaskState *task)
 		console << ConsoleColor::Blue << "\r   RBP: " << ConsoleColor::Gray << task->rbp << ConsoleColor::Blue << "     R8: " << ConsoleColor::Gray << task->r8 << ConsoleColor::Blue << "     R9: " << ConsoleColor::Gray << task->r9;
 		console << ConsoleColor::Blue << "\r   R10: " << ConsoleColor::Gray << task->r10 << ConsoleColor::Blue << "    R11: " << ConsoleColor::Gray << task->r10 << ConsoleColor::Blue << "    R12: " << ConsoleColor::Gray << task->r12;
 		console << ConsoleColor::Blue << "\r   R13: " << ConsoleColor::Gray << task->r13 << ConsoleColor::Blue << "    R14: " << ConsoleColor::Gray << task->r14 << ConsoleColor::Blue << "    R15: " << ConsoleColor::Gray << task->r15;
+		console << ConsoleColor::Blue << "\rStack Dump:";
+		console << ConsoleColor::Blue << "\r\n SS(0): " << ConsoleColor::Gray << *((uint64_t *)task->rsp) << ConsoleColor::Blue << "  SS(1): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 8) << ConsoleColor::Blue << "  SS(2): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 16);
+		console << ConsoleColor::Blue << "\r SS(3): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 24) << ConsoleColor::Blue << "  SS(4): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 32) << ConsoleColor::Blue << "  SS(5): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 40);
+		console << ConsoleColor::Blue << "\r SS(6): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 48) << ConsoleColor::Blue << "  SS(7): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 56) << ConsoleColor::Blue << "  SS(8): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 64);
+		console << ConsoleColor::Blue << "\r SS(9): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 72) << ConsoleColor::Blue << " SS(10): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 80) << ConsoleColor::Blue << " SS(11): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 88);
+		console << ConsoleColor::Blue << "\rSS(12): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 96) << ConsoleColor::Blue << " SS(13): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 104) << ConsoleColor::Blue << " SS(14): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 112);
+		console << ConsoleColor::Blue << "\rSS(15): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 120) << ConsoleColor::Blue << " SS(16): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 128) << ConsoleColor::Blue << " SS(17): " << ConsoleColor::Gray << *((uint64_t *)task->rsp - 136);
 
 		while(1) { asm("hlt"); }
 	}
