@@ -26,7 +26,7 @@
 PagingManager::PagingManager(uintptr_t address)
 {
 	this->page_map_level_4 = (PageMapLevel4Entry *)address;	
-	this->dynamic_page = (PageTableEntry *)0x305FF8LL;
+	this->dynamic_page = (PageTableEntry *)(address + 0x5FF8LL);
 	this->static_pointer = (PagingStructure *)0xFFFFFFFFFFFFF000LL;
 }
 
@@ -85,8 +85,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 
 		this->Invalidate(this->static_pointer);
 
-		//FIXME: Isn't mapped, so it will generate an Pagefault >.<
-		memset((void *)0xFFFFFFFFFFFFF000LL, 0, 4096);
+		memset((void *)this->static_pointer, 0, 4096);
 	}
 	else
 	{
@@ -109,7 +108,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 
 		this->Invalidate(this->static_pointer);
 
-		memset((void *)0xFFFFFFFFFFFFF000LL, 0, 4096);
+		memset((void *)this->static_pointer, 0, 4096);
 	}
 	else
 	{
@@ -122,7 +121,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 
 	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]);
 
-	if(pde->IsPresent() == false)
+	if(pde->IsPresent() == false || pde->IsBottom() == true)
 	{
 		pde->Clear();
 		pde->SetAccess(PageAccess::UserWritable);
@@ -134,7 +133,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 
 		this->Invalidate(this->static_pointer);
 
-		memset((void *)0xFFFFFFFFFFFFF000LL, 0, 4096);
+		memset((void *)this->static_pointer, 0, 4096);
 	}
 	else
 	{
@@ -151,10 +150,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 	pte->SetCachability(PageCachability::WriteThroughCachable);
 	pte->SetPresence(true);
 
-	asm(
-		"invlpg %0 \n"
-		: : "m" (*(char *)virtual_address)
-	);
+	this->Invalidate(virtual_address);
 
 #elif PAGESIZE == 2
 
@@ -173,14 +169,13 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 
 void PagingManager::UnMap(uintptr_t virtual_address)
 {
-	this->UpdateIndexes(virtual_address & 0x000FFFFFFFFFF000LL);	
+	this->UpdateIndexes(virtual_address & 0x000FFFFFFFFFF000LL);
 
 	this->dynamic_page->SetAddress((uintptr_t)page_map_level_4);
 
 	this->Invalidate(this->static_pointer);
 
 	PageMapLevel4Entry *pml4e = (PageMapLevel4Entry *)(&this->static_pointer[pml4i]);
-	//PageMapLevel4Entry *pml4e = (PageMapLevel4Entry *)(page_map_level_4[pml4i].GetAddress());
 
 	if(pml4e->IsPresent() == false)
 	{
@@ -192,7 +187,6 @@ void PagingManager::UnMap(uintptr_t virtual_address)
 	this->Invalidate(this->static_pointer);
 
 	PageDirectoryPointerEntry *pdpe = (PageDirectoryPointerEntry *)(&this->static_pointer[pdpi]);
-	//PageDirectoryPointerEntry *pdpe = (PageDirectoryPointerEntry *)(pml4e[pdpi].GetAddress());
 
 	if(pdpe->IsPresent() == false)
 	{
@@ -206,11 +200,19 @@ void PagingManager::UnMap(uintptr_t virtual_address)
 	this->Invalidate(this->static_pointer);
 
 	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]);
-	//PageDirectoryEntry *pde = (PageDirectoryEntry *)(pdpe[pdi].GetAddress());
 
 	if(pde->IsPresent() == false)
 	{
 		return;
+	}
+
+	if(pde->IsBottom() == true)
+	{
+			pde->SetPresence(false);
+
+			this->Invalidate(virtual_address);
+
+			return;
 	}
 
 	this->dynamic_page->SetAddress(pde->GetAddress());
@@ -218,7 +220,6 @@ void PagingManager::UnMap(uintptr_t virtual_address)
 	this->Invalidate(this->static_pointer);
 
 	PageTableEntry *pte = (PageTableEntry *)(&this->static_pointer[pti]);
-	//PageTableEntry *pte = (PageTableEntry *)(pde[pti].GetAddress());
 
 	pte->SetPresence(false);
 
@@ -229,7 +230,6 @@ void PagingManager::UnMap(uintptr_t virtual_address)
 	this->Invalidate(this->static_pointer);
 
 	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]);
-	//PageDirectoryEntry *pde = (PageDirectoryEntry *)(pdpe[pdi].GetAddress());
 
 	pde->SetPresence(false);
 
@@ -288,12 +288,8 @@ void PagingStructure::SetAccess(PageAccess access)
 
 void PagingStructure::SetAddress(uintptr_t address)
 {
-	//uintptr_t old = this->GetAddress();
-
 	this->information &= 0xFFF0000000000FFF;
 	this->information |= (~0xFFF0000000000FFF & address);
-
-	//asm("invlpg %0 \n" : : "g" (address));
 }
 
 void PagingStructure::SetCachability(PageCachability cachability)
@@ -331,6 +327,10 @@ PageDirectoryEntry::PageDirectoryEntry() : PagingStructure()
 
 	this->information = 0x80;
 
+#elif PAGESIZE == 4
+
+	this->information = 0x00;
+
 #endif
 
 }
@@ -346,32 +346,23 @@ void PageDirectoryEntry::Clear()
 
 	this->information = 0x80;
 
+#elif PAGESIZE == 4
+
+	this->information = 0x00;
+
 #endif
 
 }
 
-PageTableEntry::PageTableEntry()
+bool PageDirectoryEntry::IsBottom()
 {
+		return (this->information & 0x80);
+}
 
-#if PAGESIZE == 4
-
-	//this->information = 0x80;
-
-#endif
-
+PageTableEntry::PageTableEntry() : PagingStructure()
+{
 }
 
 PageTableEntry::~PageTableEntry()
 {
-}
-
-void PageTableEntry::Clear()
-{
-
-#if PAGESIZE == 4
-
-	//this->information = 0x80;
-
-#endif
-
 }

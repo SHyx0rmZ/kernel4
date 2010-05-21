@@ -29,7 +29,7 @@ void handle_interrupt(TaskState *task)
 
 			freemem = memory.GetAvailableMemory();
 
-			console << ConsoleArea::Bottom << ConsoleColor::Blue << "\rTime: " << ConsoleState::Decimal << (timer / 250000) / 60 << " min " << (timer / 250000) % 60 << " s  Free Memory: " << (freemem / (1024 * 1024 * 1024)) % 1024 << " GiB " << (freemem / (1024 * 1024)) % 1024 << " MiB " << (freemem / 1024) % 1024 << "KiB   " << ConsoleColor::Gray << ConsoleArea::Middle;
+			console << ConsoleArea::Bottom << ConsoleColor::Blue << "\rTime: " << ConsoleState::Decimal << (timer / 250000) / 60 << " min " << (timer / 250000) % 60 << " s  Free Memory: " << (freemem / (1024 * 1024 * 1024)) % 1024 << " GiB " << (freemem / (1024 * 1024)) % 1024 << " MiB " << (freemem / 1024) % 1024 << " KiB " << (freemem % 1024) << " B    " << ConsoleColor::Gray << ConsoleArea::Middle;
 			if(timer % 400 == 0)
 			{
 				timer += 1;
@@ -52,8 +52,9 @@ void handle_interrupt(TaskState *task)
 		out8(0x20, 0x20);
 
 		//asm("int $0");
+		console << ConsoleColor::Green << "new " << ConsoleColor::Gray << "variable @ ";
 		uint64_t *b = new uint64_t;
-		console << ConsoleColor::Green << "new " << ConsoleColor::Gray << "variable @ " << ConsoleState::HexFixed << ConsoleColor::Blue << (uint64_t)b << " ";
+		console << ConsoleState::HexFixed << ConsoleColor::Blue << (uint64_t)b << " ";
 	}
 	else
 	{

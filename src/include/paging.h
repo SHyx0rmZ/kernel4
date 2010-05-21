@@ -75,15 +75,16 @@ class PageDirectoryPointerEntry : public PagingStructure
 class PageDirectoryEntry : public PagingStructure
 {
 	public:
-		void Clear();
 		PageDirectoryEntry();
 		~PageDirectoryEntry();
+
+		void Clear();
+		bool IsBottom();
 };
 
 class PageTableEntry : public PagingStructure
 {
 	public:
-		void Clear();
 		PageTableEntry();
 		~PageTableEntry();
 };

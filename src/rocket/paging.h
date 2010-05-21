@@ -21,7 +21,7 @@
 
 #include "stdint.h"
 
-uint64_t *paging_initialize();
+uint32_t *paging_initialize(uint32_t address);
 void paging_activate(uint64_t *pml4);
 
 #endif

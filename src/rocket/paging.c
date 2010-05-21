@@ -19,51 +19,33 @@
 #include "stdint.h"
 #include "paging.h"
 
-uint64_t *paging_initialize()
+uint32_t *paging_initialize(uint32_t address)
 {
-	uint64_t *pml4e = (uint64_t *)0x300000LL;
-	*pml4e = 0x30100BLL;
-	uint64_t *pdpe = (uint64_t *)0x301000LL;
-	*pdpe = 0x30200BLL;
-	uint64_t *pd1 = (uint64_t *)0x302000LL;
-	uint64_t *pd2 = (uint64_t *)0x302008LL;
-	uint64_t *pd3 = (uint64_t *)0x302010LL;
-	uint64_t *pd4 = (uint64_t *)0x302018LL;
-	uint64_t *pd5 = (uint64_t *)0x302020LL;
-	uint64_t *pd6 = (uint64_t *)0x302028LL;
-	uint64_t *pd7 = (uint64_t *)0x302030LL;
-	uint64_t *pd8 = (uint64_t *)0x302038LL;
-	uint64_t *pd9 = (uint64_t *)0x302040LL;
-	uint64_t *pd0 = (uint64_t *)0x302048LL;
+	address += 0x0FFF;
+	address &= 0xFFFF1000;
+
+	uint64_t *pml4e = (uint64_t *)address;
+	*pml4e = address + 0x100BLL;
+	uint64_t *pdpe = (uint64_t *)(address + 0x1000);
+	*pdpe = address + 0x200BLL;
 	
-	*pd1 = 0x000018FLL;
-	*pd2 = 0x020018FLL;
-	*pd3 = 0x040018FLL;
-	*pd4 = 0x060018FLL;
-	*pd5 = 0x080018FLL;
-	*pd6 = 0x0A0018FLL;
-	*pd7 = 0x0C0018FLL;
-	*pd8 = 0x0E0018FLL;
-	*pd9 = 0x100018FLL;
-	*pd0 = 0x120018FLL;
+	uint64_t *pdd = (uint64_t *)(address + 0x2000);
 
-	uint64_t *pdd = (uint64_t *)0x302050LL;
-
-	for(uint8_t i = 0; i < 118; i++)
+	for(uint8_t i = 0; i < 128; i++)
 	{
-		*(pdd++) = i * 0x200000 + 0x0140018F;
+		*(pdd++) = i * 0x200000 + 0x018FLL;
 	}
 
-	uint64_t *pml4ex = (uint64_t *)0x300FF8LL;
-	*pml4ex = 0x30300BLL;
-	uint64_t *pdpex = (uint64_t *)0x303FF8LL;
-	*pdpex = 0x30400BLL;
-	uint64_t *pdx = (uint64_t *)0x304FF8LL;
-	*pdx = 0x30500BLL;
-	uint64_t *ptx = (uint64_t *)0x305FF8LL;
-	*ptx = 0x30018FLL;
+	uint64_t *pml4ex = (uint64_t *)(address + 0x0FF8);
+	*pml4ex = address + 0x300BLL;
+	uint64_t *pdpex = (uint64_t *)(address + 0x3FF8);
+	*pdpex = address + 0x400BLL;
+	uint64_t *pdx = (uint64_t *)(address + 0x4FF8);
+	*pdx = address + 0x500BLL;
+	uint64_t *ptx = (uint64_t *)(address + 0x5FF8);
+	*ptx = address + 0x018FLL;
 
-	return (uint64_t *)0x300000LL;
+	return (uint32_t *)address;
 }
 
 void paging_activate(uint64_t *pml4)

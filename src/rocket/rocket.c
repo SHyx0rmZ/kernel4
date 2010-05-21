@@ -29,6 +29,8 @@
 
 extern gdt_pointer_t gdt_pointer;
 
+extern char page_tables[];
+
 void start_rocket_engine(struct multiboot_info *info)
 {
 	clear_screen();
@@ -214,7 +216,9 @@ void start_rocket_engine(struct multiboot_info *info)
 	ewrin();
 	print("Initializing Paging...", COLOR_GRAY);
 
-	uint64_t *pml4 = paging_initialize();
+	memset((void *)page_tables, 0, 0x8000); 
+
+	uint64_t *pml4 = (uint64_t *)paging_initialize((uint32_t)page_tables);
 	
 	ewrin();
 	print("Switching to Long Mode...", COLOR_GRAY);
@@ -229,6 +233,6 @@ void start_rocket_engine(struct multiboot_info *info)
 		"push $0x10 \n"
 		"push %0 \n"
 		"retf \n"
-		: : "g" (hdr->e_entry) , "D" (multiboot), "S" (&gdt_pointer)
+		: : "g" (hdr->e_entry) , "D" (multiboot), "S" (pml4)
 	   );
 }

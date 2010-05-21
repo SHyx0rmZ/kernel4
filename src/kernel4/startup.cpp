@@ -21,11 +21,11 @@
 
 typedef void (*constructor)();
 
-extern "C" void entry(struct MultibootInformationSpecification *multiboot_info_32bit);
+extern "C" void entry(struct MultibootInformationSpecification *multiboot_info_32bit, uint32_t page_tables);
 extern "C" constructor start_ctors;
 extern "C" constructor end_ctors;
 
-void entry(struct MultibootInformationSpecification *multiboot_info_32bit/*, GDTPointer gdt_pointer*/)
+void entry(struct MultibootInformationSpecification *multiboot_info_32bit, uint32_t page_tables)
 {
 	MultibootInformation multiboot;
 
@@ -45,7 +45,7 @@ void entry(struct MultibootInformationSpecification *multiboot_info_32bit/*, GDT
 		(*i)();
 	}
 
-	Kernel kernel(multiboot);
+	Kernel kernel(multiboot, (0x0000LL + page_tables));
 
 	while(1);
 }

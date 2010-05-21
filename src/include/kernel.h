@@ -24,7 +24,7 @@
 class Kernel
 {
 	public:
-		Kernel(MultibootInformation multiboot);
+		Kernel(MultibootInformation multiboot, uintptr_t paging_structures);
 		~Kernel();
 };
 

@@ -16,6 +16,7 @@
 
 extern start_rocket_engine
 global entry
+global page_tables
 
 section .multiboot
 
@@ -44,3 +45,6 @@ idle:
 cli
 hlt
 jmp idle
+
+page_tables:
+times 0x8000 db 0 

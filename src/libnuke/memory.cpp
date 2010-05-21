@@ -5,7 +5,6 @@ void test()
 	MemoryStack *a = new MemoryStack(0x0000);
 	MemoryStack *b = new MemoryStack[2] { MemoryStack(0x1000), MemoryStack(0x2000) };
 	a->Push(0x2);
-	memory.PFree(0x0);
 	delete a;
 	delete[] b;
 }

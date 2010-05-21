@@ -41,8 +41,10 @@ extern void test();
  * 
  * @param multiboot		The multiboot information structure the bootloader created
  */
-Kernel::Kernel(MultibootInformation multiboot)
+Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 {
+	paging = PagingManager(paging_structures);
+
 	console.Clear();
 
 	// Wonderful TUI
@@ -208,20 +210,9 @@ Kernel::Kernel(MultibootInformation multiboot)
 	console << ConsoleColor::Green << "WRIN\r\n" << ConsoleColor::Gray;
 	console << "Entering endless loop...\r\n";
 
-	/*paging.Map(0x00000000, 0x00000000);
-	paging.Map(0x00200000, 0x00200000);
-	paging.Map(0x00400000, 0x00400000);
-	paging.Map(0x00600000, 0x00600000);
-	paging.Map(0x00800000, 0x00800000);
-	paging.Map(0x00A00000, 0x00A00000);
-	paging.Map(0x00C00000, 0x00C00000);
-	paging.Map(0x00E00000, 0x00E00000);
-	paging.Map(0x01000000, 0x01000000);
-	paging.Map(0x01200000, 0x01200000);
-	paging.Map(0xFFFFFFFFFFFFF000LL, 0x00F00000);*/
 	paging.Load();
 
-	//test();
+	test();
 
 	asm("sti");
 
