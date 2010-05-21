@@ -445,3 +445,8 @@ Console &Console::operator<<(ConsoleArea area)
 
 	return *this;
 }
+
+Console &Console::operator<<(uint64_t *pointer)
+{
+		return (*this << *pointer);
+}

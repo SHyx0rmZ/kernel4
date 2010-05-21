@@ -69,6 +69,7 @@ class Console
 		Console &operator<<(ConsoleColor color);
 		Console &operator<<(ConsoleState state);
 		Console &operator<<(ConsoleArea area);
+		Console &operator<<(uint64_t *pointer);
 
 	private:
 		static uint16_t *video;
