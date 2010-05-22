@@ -22,6 +22,7 @@
 #include <memory.h>
 #include <console.h>
 #include <managers.h>
+#include <splay.h>
 
 extern const uintptr_t start_kernel;
 extern const uintptr_t end_kernel;
