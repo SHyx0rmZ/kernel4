@@ -48,6 +48,7 @@ class SplayTree
 		SplayTreeNode<T> *Search(T *data);
 		SplayTreeNode<T> *Search(T *data, SplayTreeNode<T> *root);
 		uint64_t Size();
+		SplayTreeNode<T> Top();
 
 	private:
 		void Splay(T *data);
@@ -110,11 +111,11 @@ void SplayTree<T>::Add(SplayTreeNode<T> *data)
 	{
 		this->Splay(data->Data);
 
-		if(data->Data == this->Root->Data)
+		if(*data->Data == *this->Root->Data)
 		{
 			return;
 		}
-		else if(data->Data < this->Root->Data)
+		else if(*data->Data < *this->Root->Data)
 		{
 			data->Left = this->Root->Left;
 			data->Right = this->Root;
@@ -135,7 +136,7 @@ void SplayTree<T>::Add(SplayTreeNode<T> *data)
 template <class T>
 void SplayTree<T>::Remove(T *data)
 {
-	if(this->Root != NULL && this->Search(data)->Data == data)
+	if(this->Root != NULL && *this->Search(data)->Data == *data)
 	{
 		SplayTreeNode<T> *d = new SplayTreeNode<T>(data);
 		SplayTreeNode<T> *n = this->Root;
@@ -157,7 +158,7 @@ void SplayTree<T>::Remove(SplayTreeNode<T> *data)
 
 	this->Splay(data->Data);
 
-	if(this->Root->Data == data->Data)
+	if(*this->Root->Data == *data->Data)
 	{
 		if(this->Root->Left == NULL)
 		{
@@ -185,7 +186,7 @@ SplayTreeNode<T> *SplayTree<T>::Search(T *data)
 
 	this->Splay(data);
 
-	if(this->Root->Data == data)
+	if(*this->Root->Data == *data)
 	{
 		return this->Root;
 	}
@@ -216,14 +217,14 @@ void SplayTree<T>::Splay(T *data)
 
 	while(1)
 	{
-		if(data < this->Root->Data)
+		if(*data < *this->Root->Data)
 		{
 			if(this->Root->Left == NULL)
 			{
 				break;
 			}
 
-			if(data < this->Root->Left->Data)
+			if(*data < *this->Root->Left->Data)
 			{
 				y = this->Root->Left;
 				this->Root->Left = y->Right;
@@ -240,14 +241,14 @@ void SplayTree<T>::Splay(T *data)
 			r = this->Root;
 			this->Root = this->Root->Left;
 		}
-		else if(data > this->Root->Data)
+		else if(*data > *this->Root->Data)
 		{
 			if(this->Root->Right == NULL)
 			{
 				break;
 			}
 
-			if(data > this->Root->Right->Data)
+			if(*data > *this->Root->Right->Data)
 			{
 				y = this->Root->Right;
 				this->Root->Right = y->Left;
@@ -280,6 +281,12 @@ template <class T>
 void SplayTree<T>::Splay(SplayTreeNode<T> *data)
 {
 	this->Splay(data->Data);
+}
+
+template <class T>
+SplayTreeNode<T> SplayTree<T>::Top()
+{
+	return this->Root;
 }
 
 #endif
