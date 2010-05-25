@@ -49,7 +49,7 @@ class SplayTree
 		SplayTreeNode<T> *Search(T *data);
 		SplayTreeNode<T> *Search(T *data, SplayTreeNode<T> *root);
 		uint64_t Size();
-		SplayTreeNode<T> Top();
+		SplayTreeNode<T> *Top();
 
 	private:
 		void Splay(T *data);
@@ -285,7 +285,7 @@ void SplayTree<T>::Splay(SplayTreeNode<T> *data)
 }
 
 template <class T>
-SplayTreeNode<T> SplayTree<T>::Top()
+SplayTreeNode<T> *SplayTree<T>::Top()
 {
 	return this->Root;
 }

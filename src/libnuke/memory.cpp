@@ -2,16 +2,11 @@
 
 void test()
 {
-	MemoryStack *a = new MemoryStack(0x0000);
-	MemoryStack *b = new MemoryStack[2] { MemoryStack(0x1000), MemoryStack(0x2000) };
-	a->Push(0x2);
-	delete a;
-	delete[] b;
 }
 
 void *operator new(size_t size)
 {
-	if(size > 4096)
+	if(size > 4000)
 	{
 		console << ConsoleColor::Red << "You just got pwned by NoobMM!";
 

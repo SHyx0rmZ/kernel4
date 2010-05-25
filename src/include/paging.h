@@ -100,6 +100,7 @@ class PagingManager
 		void Load();
 		void Invalidate(uintptr_t virtual_address);
 		void Invalidate(PagingStructure *page);
+		uintptr_t Address();
 
 	private:
 		PageMapLevel4Entry *page_map_level_4;

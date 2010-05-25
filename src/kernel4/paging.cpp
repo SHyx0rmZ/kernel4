@@ -34,6 +34,11 @@ PagingManager::~PagingManager()
 {
 }
 
+uintptr_t PagingManager::Address()
+{
+	return (uintptr_t)this->page_map_level_4;
+}
+
 void PagingManager::Load()
 {
 	asm(

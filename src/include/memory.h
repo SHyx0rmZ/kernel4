@@ -20,33 +20,7 @@
 #define _MEMORY_H_
 
 #include <stdint.h>
-
-class MemoryStack
-{
-	public:
-		MemoryStack(uintptr_t address);
-		~MemoryStack();
-
-		uint64_t GetSize();
-		bool IsEmpty();
-		uintptr_t Pop();
-		void Push(uintptr_t block);
-
-	private:
-		uintptr_t *stack;
-		uint64_t size;
-};
-
-class MemoryBitmap
-{
-	public:
-		MemoryBitmap(uintptr_t address, uint16_t size);
-		~MemoryBitmap();
-
-	private:
-		uint64_t *bitmap;
-		uint16_t size;
-};
+#include <splay.h>
 
 class MemoryManager
 {
@@ -62,22 +36,7 @@ class MemoryManager
 		void VFree(uintptr_t address);
 
 	private:
-		static MemoryBitmap lowmemory;
-		static MemoryStack memory;
+		SplayTree<uint64_t> tree;
 };
-
-class VirtualBlock
-{
-	public:
-		uintptr_t address;
-		uint64_t size;
-} __attribute__((packed));
-
-class PageBlock
-{
-	public:
-		uintptr_t base;
-		uintptr_t current;
-} __attribute__((packed));
 
 #endif

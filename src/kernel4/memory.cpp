@@ -22,57 +22,10 @@
 #include <memory.h>
 #include <console.h>
 #include <managers.h>
+#include <string.h>
 
 extern const uintptr_t start_kernel;
 extern const uintptr_t end_kernel;
-
-MemoryStack::MemoryStack(uintptr_t address)
-{
-	this->size = 0;
-	this->stack = (uintptr_t *)address;
-}
-
-MemoryStack::~MemoryStack()
-{
-}
-
-uint64_t MemoryStack::GetSize()
-{
-	return this->size;
-}
-
-bool MemoryStack::IsEmpty()
-{
-	return (this->size == 0);
-}
-
-uintptr_t MemoryStack::Pop()
-{
-	if(this->size == 0)
-	{
-		return NULL;
-	}
-
-	return this->stack[--size];
-}
-
-void MemoryStack::Push(uintptr_t block)
-{
-	stack[size++] = block;
-}
-
-MemoryBitmap::MemoryBitmap(uintptr_t address, uint16_t size)
-{
-	this->bitmap = (uint64_t *)address;
-	this->size = size;
-}
-
-MemoryBitmap::~MemoryBitmap()
-{
-}
-
-MemoryBitmap MemoryManager::lowmemory = MemoryBitmap(0x1000000, 512);
-MemoryStack MemoryManager::memory = MemoryStack(0x1100000);
 
 MemoryManager::MemoryManager()
 {
@@ -84,16 +37,9 @@ MemoryManager::~MemoryManager()
 
 uint64_t MemoryManager::GetAvailableMemory()
 {
+	//return memory.GetSize() * 0x1000;
 
-#if PAGESIZE == 4
-
-	return memory.GetSize() * 0x1000;
-
-#elif PAGESIZE == 2
-
-	return memory.GetSize() * 0x200000;
-
-#endif
+	return 42;
 }
 
 void MemoryManager::VFree(uintptr_t address)
@@ -120,12 +66,13 @@ uintptr_t MemoryManager::VAlloc()
 void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 {
 
+
 #if PAGESIZE == 4
 
 	uintptr_t bs = ((address + 0x0FFF) & ~0xFFF);
 	uintptr_t be = ((address + length) & ~0xFFF);
 
-	if((bs < start_kernel && be < start_kernel) || (bs > end_kernel && be > end_kernel))
+	if((bs < (uintptr_t)&start_kernel && be < (uintptr_t)&start_kernel && bs < paging.Address() && be < paging.Address()) || (bs > (uintptr_t)&end_kernel && be > (uintptr_t)&end_kernel && bs > paging.Address() + 0x8000 && be > paging.Address() + 0x8000))
 	{
 		while(bs < be && (be - bs) >= 0x1000)
 		{
@@ -138,7 +85,7 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 	{
 		while(bs < be && (be - bs) >= 0x1000)
 		{
-			if((bs < start_kernel && (bs + 0x1000) < start_kernel) || (bs > end_kernel && (bs + 0x1000) > end_kernel))
+			if((bs < (uintptr_t)&start_kernel && (bs + 0x1000) < (uintptr_t)&start_kernel && bs < paging.Address() && be < paging.Address()) || (bs > (uintptr_t)&end_kernel && (bs + 0x1000) > (uintptr_t)&end_kernel && bs > paging.Address() + 0x8000 && be > paging.Address() + 0x8000))
 			{
 				this->PFree(bs);
 			}
@@ -148,6 +95,9 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 	}
 
 #elif PAGESIZE == 2
+
+	//TODO: BUGFIX
+	asijg39zulajsd
 
 	uintptr_t bs = ((address + 0x1FFFFF) & ~0x1FFFFF);
 	uintptr_t be = ((address + length) & ~0x1FFFFF);
@@ -180,12 +130,21 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 
 void MemoryManager::PFree(uintptr_t block)
 {
-	memory.Push(block);
+	//FIXME: Everything above 0x0FFFFFFF will Page Fault (not mapped)
+	//memset((void *)block, 0, 4096);
+
+	SplayTreeNode<uint64_t> *node = (SplayTreeNode<uint64_t> *)block;
+	node->Left = NULL;
+	node->Right = NULL;
+	node->Data = (uint64_t *)(block + sizeof(SplayTreeNode<uint64_t>));
+	*node->Data = 4096 - sizeof(SplayTreeNode<uint64_t>) - sizeof(uint64_t);
+
+	tree.Add(node);
 }
 
 uintptr_t MemoryManager::PAlloc()
 {
-	if(memory.IsEmpty())
+	if(tree.Size() == 0)
 	{
 		Console console;
 
@@ -197,5 +156,9 @@ uintptr_t MemoryManager::PAlloc()
 		}
 	}
 
-	return memory.Pop();
+	SplayTreeNode<uint64_t> *node = tree.Top();
+
+	tree.Remove(node);
+
+	return ((uintptr_t)node->Data + sizeof(uint64_t));
 }
