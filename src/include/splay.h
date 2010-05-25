@@ -20,6 +20,7 @@
 #define _SPLAY_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 template <class T>
 class SplayTreeNode

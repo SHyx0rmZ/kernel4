@@ -22,7 +22,6 @@
 #include <memory.h>
 #include <console.h>
 #include <managers.h>
-#include <splay.h>
 
 extern const uintptr_t start_kernel;
 extern const uintptr_t end_kernel;
@@ -192,7 +191,10 @@ uintptr_t MemoryManager::PAlloc()
 
 		console << ConsoleColor::Red << "No further memory available!\r\nHalting system!";
 
-		while(1);
+		while(1)
+		{
+			asm("cli;hlt");
+		}
 	}
 
 	return memory.Pop();

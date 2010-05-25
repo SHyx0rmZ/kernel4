@@ -11,11 +11,15 @@ void test()
 
 void *operator new(size_t size)
 {
-	asm(
-		"mov 8(%rbp), %r10 \n"
-	);
+	if(size > 4096)
+	{
+		console << ConsoleColor::Red << "You just got pwned by NoobMM!";
 
-	size = size;
+		while(1)
+		{
+			asm("cli;hlt");
+		}
+	}
 
 	return (void *)memory.VAlloc();
 }
