@@ -37,7 +37,7 @@ extern void test();
 
 /**
  * Creates a new instance of the kernel
- * 
+ *
  * @param multiboot		The multiboot information structure the bootloader created
  */
 Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
@@ -66,7 +66,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	{
 		// Print some information
 		console << "Memory block @ " << ConsoleState::HexFixed << memstart->address << " - " << memstart->address + memstart->length << " (" << ConsoleState::Decimal << ConsoleColor::Blue;
-		
+
 		uint64_t memsize = memstart->length / 1024;
 
 		if(memsize > 1024)
@@ -100,13 +100,14 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 
 	// TODO: Replace address with new()
 	// Set up the GDT
-	GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
+	//GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
+	GDTTable gdt(5, memory.PAlloc());
 
-	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode, 		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
-	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode, 		GDTType::Code, GDTRing::Ring0));
-	gdt.SetEntry(2, GDTEntry(GDTMode::ProtectedMode, 	GDTType::Data, GDTRing::Ring0));
-	gdt.SetEntry(3, GDTEntry(GDTMode::LongMode, 		GDTType::Code, GDTRing::Ring3));
-	gdt.SetEntry(4, GDTEntry(GDTMode::ProtectedMode, 	GDTType::Data, GDTRing::Ring3));
+	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode,		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
+	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode,		GDTType::Code, GDTRing::Ring0));
+	gdt.SetEntry(2, GDTEntry(GDTMode::ProtectedMode,	GDTType::Data, GDTRing::Ring0));
+	gdt.SetEntry(3, GDTEntry(GDTMode::LongMode,		GDTType::Code, GDTRing::Ring3));
+	gdt.SetEntry(4, GDTEntry(GDTMode::ProtectedMode,	GDTType::Data, GDTRing::Ring3));
 
 	// Load GDT and set up proper segments
 	gdt.MakeActive();
@@ -123,7 +124,8 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 
 	// TODO: Replace address with new()
 	// Set up IDT
-	IDTTable idt(128, 0x200000 - (5 * sizeof(GDTEntry)) - (128 * sizeof(IDTEntry)));
+	//IDTTable idt(128, 0x200000 - (5 * sizeof(GDTEntry)) - (128 * sizeof(IDTEntry)));
+	IDTTable idt(128, memory.PAlloc());
 
 	// Install dummy handlers for every interrupt
 	for(uint16_t i = 0; i < idt.GetSize(); i++)
@@ -183,7 +185,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 
 	out8(0x21, 0x20); // Master Vector
 	out8(0xA1, 0x28); // Slave Vector
-	
+
 	out8(0x21, 0x04); // Slave is on 0x22
 	out8(0xA1, 0x02); // Master is on 0x29
 
@@ -202,7 +204,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	out8(0x43, 0x34);
 	out8(0x40, (timer_divisor & 0xFF));
 	out8(0x40, (timer_divisor >> 8));
-	
+
 	// Enable Interrupts (Taskswitchs)
 	//asm("sti");
 
