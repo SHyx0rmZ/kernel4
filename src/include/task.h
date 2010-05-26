@@ -30,40 +30,4 @@ class TaskState
 		uint64_t interrupt, error, rip, cs, rflags, rsp, ss;
 } __attribute__((packed));
 
-/*class ExtendedTaskState
-{
-	public:
-		PageBlock *page_blocks;
-		uint64_t
-		VirtualBlock *virtual_blocks;
-};*/
-
-/*class CompleteTaskState
-{
-	public:
-		TaskState *cpu;
-		//ExtendedTaskState *process;
-}:*/
-
-class TaskManager
-{
-	public:
-		TaskManager(uintptr_t position, uint16_t maximum_task_number);
-		~TaskManager();
-
-		void Schedule(TaskState *state);
-		void Create(uintptr_t entry);
-		void DestroyCurrent();
-		uint16_t GetCurrent();
-
-	private:
-		static uintptr_t base;
-		static uintptr_t position;
-		TaskState *tasks;
-		uint16_t limit;
-		uint16_t current;
-		uint16_t number;
-		uint64_t running[1024];
-};
-
 #endif

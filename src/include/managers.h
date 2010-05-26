@@ -27,6 +27,5 @@
 extern MemoryManager memory;
 extern PagingManager paging;
 extern Console console;
-extern TaskManager scheduler;
 
 #endif

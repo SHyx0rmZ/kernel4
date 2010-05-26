@@ -32,7 +32,6 @@
 Console console;
 MemoryManager memory;
 PagingManager paging(0x300000);
-TaskManager scheduler(0xE00000, 4000);
 
 extern void test();
 
