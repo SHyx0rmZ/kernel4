@@ -115,8 +115,6 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 		this->Invalidate(this->static_pointer);
 	}
 
-#if PAGESIZE == 4
-
 	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]);
 
 	if(pde->IsPresent() == false || pde->IsBottom() == true)
@@ -149,20 +147,6 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 	pte->SetPresence(true);
 
 	this->Invalidate(virtual_address);
-
-#elif PAGESIZE == 2
-
-	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]); 
-
-	pde->Clear();
-	pde->SetAccess(PageAccess::UserWritable);
-	pde->SetAddress(physical_address);
-	pde->SetCachability(PageCachability::WriteThroughCachable);
-	pde->SetPresence(true);
-
-	this->Invalidate(virtual_address);
-
-#endif
 }
 
 void PagingManager::UnMap(uintptr_t virtual_address)
@@ -191,8 +175,6 @@ void PagingManager::UnMap(uintptr_t virtual_address)
 		return;
 	}
 
-#if PAGESIZE == 4
-
 	this->dynamic_page->SetAddress(pdpe->GetAddress());
 
 	this->Invalidate(this->static_pointer);
@@ -220,18 +202,6 @@ void PagingManager::UnMap(uintptr_t virtual_address)
 	PageTableEntry *pte = (PageTableEntry *)(&this->static_pointer[pti]);
 
 	pte->SetPresence(false);
-
-#elif PAGESIZE == 2
-
-	this->dynamic_page->SetAddress(pdpe->GetAddress());
-
-	this->Invalidate(this->static_pointer);
-
-	PageDirectoryEntry *pde = (PageDirectoryEntry *)(&this->static_pointer[pdi]);
-
-	pde->SetPresence(false);
-
-#endif
 
 	this->Invalidate(virtual_address);
 }
@@ -320,17 +290,6 @@ PageDirectoryPointerEntry::~PageDirectoryPointerEntry()
 
 PageDirectoryEntry::PageDirectoryEntry() : PagingStructure()
 {
-
-#if PAGESIZE == 2
-
-	this->information = 0x80;
-
-#elif PAGESIZE == 4
-
-	this->information = 0x00;
-
-#endif
-
 }
 
 PageDirectoryEntry::~PageDirectoryEntry()
@@ -339,22 +298,13 @@ PageDirectoryEntry::~PageDirectoryEntry()
 
 void PageDirectoryEntry::Clear()
 {
-
-#if PAGESIZE == 2
-
-	this->information = 0x80;
-
-#elif PAGESIZE == 4
-
 	this->information = 0x00;
-
-#endif
 
 }
 
 bool PageDirectoryEntry::IsBottom()
 {
-		return (this->information & 0x80);
+	return (this->information & 0x80);
 }
 
 PageTableEntry::PageTableEntry() : PagingStructure()

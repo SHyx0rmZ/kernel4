@@ -17,5 +17,5 @@
  */
 
 // Set the size of a page 4: 4096 KiB; 2: 2 MiB; 1: 1 GiB (unsupported on most CPUs!)
-#define PAGESIZE 4
+//#define PAGESIZE 4
 #define NUKE_VERSION "kernel4-0.0.1"
