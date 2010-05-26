@@ -29,6 +29,7 @@ extern const uintptr_t end_kernel;
 
 MemoryManager::MemoryManager()
 {
+	this->tree = SplayTree<MemoryBlock>();
 }
 
 MemoryManager::~MemoryManager()
@@ -39,7 +40,7 @@ uint64_t MemoryManager::GetAvailableMemory()
 {
 	//return memory.GetSize() * 0x1000;
 
-	return 42;
+	return this->tree.Size() * 0x1000;
 }
 
 void MemoryManager::VFree(uintptr_t address)
@@ -76,6 +77,9 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 	{
 		while(bs < be && (be - bs) >= 0x1000)
 		{
+			if(bs >= 0x10000000)
+				paging.Map(bs, bs);
+
 			this->PFree(bs);
 
 			bs += 0x1000;
@@ -87,6 +91,9 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 		{
 			if((bs < (uintptr_t)&start_kernel && (bs + 0x1000) < (uintptr_t)&start_kernel && bs < paging.Address() && be < paging.Address()) || (bs > (uintptr_t)&end_kernel && (bs + 0x1000) > (uintptr_t)&end_kernel && bs > paging.Address() + 0x8000 && be > paging.Address() + 0x8000))
 			{
+				if(bs >= 0x10000000)
+					paging.Map(bs, bs);
+
 				this->PFree(bs);
 			}
 
@@ -130,14 +137,14 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 
 void MemoryManager::PFree(uintptr_t block)
 {
-	//FIXME: Everything above 0x0FFFFFFF will Page Fault (not mapped)
-	//memset((void *)block, 0, 4096);
+	memset((void *)block, 0, 4096);
 
-	SplayTreeNode<uint64_t> *node = (SplayTreeNode<uint64_t> *)block;
+	SplayTreeNode<MemoryBlock> *node = (SplayTreeNode<MemoryBlock> *)block;
 	node->Left = NULL;
 	node->Right = NULL;
-	node->Data = (uint64_t *)(block + sizeof(SplayTreeNode<uint64_t>));
-	*node->Data = 4096 - sizeof(SplayTreeNode<uint64_t>) - sizeof(uint64_t);
+	node->Data = (MemoryBlock *)(block + sizeof(SplayTreeNode<MemoryBlock>));
+	node->Data->Address = (block + sizeof(SplayTreeNode<MemoryBlock>) + sizeof(MemoryBlock));
+	node->Data->Size = 4096 - sizeof(SplayTreeNode<MemoryBlock>) - sizeof(MemoryBlock);
 
 	tree.Add(node);
 }
@@ -156,9 +163,34 @@ uintptr_t MemoryManager::PAlloc()
 		}
 	}
 
-	SplayTreeNode<uint64_t> *node = tree.Top();
+	SplayTreeNode<MemoryBlock> *node = tree.Top();
 
 	tree.Remove(node);
 
-	return ((uintptr_t)node->Data + sizeof(uint64_t));
+	return ((uintptr_t)node->Data->Address - sizeof(SplayTreeNode<MemoryBlock>) - sizeof(MemoryBlock));
+}
+
+MemoryBlock::MemoryBlock()
+{
+	this->Address = NULL;
+	this->Size = 0;
+}
+
+MemoryBlock::~MemoryBlock()
+{
+}
+
+bool MemoryBlock::operator==(const MemoryBlock m)
+{
+	return (this->Address == m.Address && this->Size == m.Size);
+}
+
+bool MemoryBlock::operator>(const MemoryBlock m)
+{
+	return (this->Address > m.Address);
+}
+
+bool MemoryBlock::operator<(const MemoryBlock m)
+{
+	return (this->Address < m.Address);
 }

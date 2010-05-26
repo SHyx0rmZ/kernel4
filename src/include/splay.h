@@ -130,8 +130,9 @@ void SplayTree<T>::Add(SplayTreeNode<T> *data)
 		}
 		
 		this->Root = data;
-		this->Elements++;
 	}
+
+	this->Elements++;
 }
 
 template <class T>

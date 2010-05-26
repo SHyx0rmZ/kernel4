@@ -22,6 +22,20 @@
 #include <stdint.h>
 #include <splay.h>
 
+class MemoryBlock
+{
+	public:
+		MemoryBlock();
+		~MemoryBlock();
+
+		bool operator==(const MemoryBlock m);
+		bool operator>(const MemoryBlock m);
+		bool operator<(const MemoryBlock m);
+
+		uintptr_t Address;
+		uint64_t Size;
+};
+
 class MemoryManager
 {
 	public:
@@ -36,7 +50,7 @@ class MemoryManager
 		void VFree(uintptr_t address);
 
 	private:
-		SplayTree<uint64_t> tree;
+		SplayTree<MemoryBlock> tree;
 };
 
 #endif

@@ -50,7 +50,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	// Wonderful TUI
 	console << ConsoleArea::Top << ConsoleColor::DarkGray << "ASXSoft " << ConsoleColor::Blue << "Nuke " << ConsoleColor::DarkGray << "- " << ConsoleColor::Blue << "Version " << NUKE_VERSION << ConsoleColor::Gray << ConsoleArea::Middle;
 
-	console << "Initializing memory pool...\r\n";
+	console << "Initializing memory pool... (Note: This can take quite some time)\r\n";
 
 	// If Bit 6 is cleared there is no memory map, so abort
 	if((multiboot.flags & (1 << 6)) == 0)
