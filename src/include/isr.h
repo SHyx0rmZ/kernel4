@@ -59,7 +59,9 @@ extern "C" void irq_stub_14();
 extern "C" void irq_stub_15();
 
 extern "C" void isr_null();
+extern "C" void isr_system();
 
+extern "C" void dump_info(TaskState *task);
 extern "C" void handle_interrupt(TaskState *task);
 
 #endif

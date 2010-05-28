@@ -173,6 +173,8 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	idt.SetEntry(46, IDTEntry((uintptr_t)irq_stub_14, IDTType::Trap));
 	idt.SetEntry(47, IDTEntry((uintptr_t)irq_stub_15, IDTType::Trap));
 
+	idt.SetEntry(81, IDTEntry((uintptr_t)isr_system));
+
 	// Load IDT
 	idt.MakeActive();
 
@@ -216,7 +218,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	test();
 
 	asm("sti");
-
+	asm("int $81");
 	// Idle
 	while(1)
 	{

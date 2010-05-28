@@ -85,6 +85,12 @@ isr_null:
 	push qword 0xc0de
 	jmp int_common
 
+global isr_system
+isr_system:
+	push qword 0
+	push qword 81
+	jmp int_common
+
 int_common:
 	push r15
 	push r14
