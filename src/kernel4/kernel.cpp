@@ -32,6 +32,7 @@
 Console console;
 MemoryManager memory;
 PagingManager paging(0x300000);
+GDTTable gdt(5, 0x300000);
 
 extern void test();
 
@@ -101,7 +102,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	// TODO: Replace address with new()
 	// Set up the GDT
 	//GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
-	GDTTable gdt(5, memory.PAlloc());
+	gdt = GDTTable(5, memory.PAlloc());
 
 	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode,		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
 	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode,		GDTType::Code, GDTRing::Ring0));
@@ -218,8 +219,13 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	test();
 
 	asm("sti");
-	asm("int $81");
-	// Idle
+	asm("hlt");
+}
+
+void Kernel::Idle()
+{
+	console << "Kernel is now idling...\r\n";
+
 	while(1)
 	{
 		asm("hlt");

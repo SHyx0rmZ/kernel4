@@ -23,9 +23,11 @@
 #include <paging.h>
 #include <console.h>
 #include <task.h>
+#include <gdt.h>
 
 extern MemoryManager memory;
 extern PagingManager paging;
 extern Console console;
+extern GDTTable gdt;
 
 #endif

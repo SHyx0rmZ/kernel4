@@ -288,7 +288,7 @@ bool GDTEntry::SetExecuteOnly(bool executeonly)
 
 	this->access &= ~(1 << 1);
 	this->access |= (!executeonly << 1);
-	
+
 	return true;
 }
 
@@ -307,7 +307,7 @@ bool GDTEntry::SetExpandDown(bool expanddown)
 
 	this->access &= ~(1 << 2);
 	this->access |= (expanddown << 2);
-	
+
 	return true;
 }
 
@@ -373,7 +373,7 @@ bool GDTEntry::SetReadOnly(bool readonly)
 
 	this->access &= ~(1 << 1);
 	this->access |= (!readonly << 1);
-	
+
 	return true;
 }
 
@@ -403,7 +403,7 @@ bool GDTEntry::SetSystemType(GDTSystemType32 systemtype)
 
 	this->access &= 0xF0;
 	this->access |= ((uint8_t)systemtype & 0x0F);
-	
+
 	return true;
 }
 
@@ -422,7 +422,7 @@ bool GDTEntry::SetSystemType(GDTSystemType64 systemtype)
 
 	this->access &= 0xF0;
 	this->access |= ((uint8_t)systemtype & 0x0F);
-	
+
 	return true;
 }
 
@@ -441,7 +441,7 @@ bool GDTEntry::SetSystemType32(GDTSystemType32 systemtype)
 
 	this->access &= 0xF0;
 	this->access |= ((uint8_t)systemtype & 0x0F);
-	
+
 	return true;
 }
 
@@ -460,7 +460,7 @@ bool GDTEntry::SetSystemType64(GDTSystemType64 systemtype)
 
 	this->access &= 0xF0;
 	this->access |= ((uint8_t)systemtype & 0x0F);
-	
+
 	return true;
 }
 
@@ -521,7 +521,7 @@ bool operator ==(GDTEntry e1, GDTEntry e2)
 
 /**
  * Creates a new GDT (or rather, a structure to manage it)
- * 
+ *
  * @param size		The number of entries the GDTTable can hold
  * @param position		A pointer to a GDTEntry array
  */
@@ -541,6 +541,21 @@ GDTTable::GDTTable(uint8_t size, uintptr_t position)
 
 GDTTable::~GDTTable()
 {
+}
+
+uint16_t GDTTable::GetDescriptor(GDTEntry entry)
+{
+	return this->GetDescriptor(this->GetIndex(entry));
+}
+
+uint16_t GDTTable::GetDescriptor(uint8_t index)
+{
+	return ((index << 3) | (uint8_t)(this->GetEntry(index).GetRing()));
+}
+
+GDTEntry GDTTable::GetEntry(GDTEntry entry)
+{
+	return this->GetEntry(this->GetIndex(entry));
 }
 
 /**
@@ -639,37 +654,37 @@ void GDTTable::ReloadSegment(GDTSegmentRegister segment, uint8_t index)
 				"push $1f \n"
 				"rex.w retf \n"
 				"1: \n"
-				: : "a" (index << 3)
+				: : "a" (this->GetDescriptor(index))
 			);
 			break;
 		case GDTSegmentRegister::DS:
 			asm(
 				"mov %0, %%ds \n"
-				: : "r" (index << 3)
+				: : "r" (this->GetDescriptor(index))
 			);
 			break;
 		case GDTSegmentRegister::ES:
 			asm(
 				"mov %0, %%es \n"
-				: : "r" (index << 3)
+				: : "r" (this->GetDescriptor(index))
 			);
 			break;
 		case GDTSegmentRegister::FS:
 			asm(
 				"mov %0, %%fs \n"
-				: : "r" (index << 3)
+				: : "r" (this->GetDescriptor(index))
 			);
 			break;
 		case GDTSegmentRegister::GS:
 			asm(
 				"mov %0, %%gs \n"
-				: : "r" (index << 3)
+				: : "r" (this->GetDescriptor(index))
 			);
 			break;
 		case GDTSegmentRegister::SS:
 			asm(
 				"mov %0, %%ss \n"
-				: : "r" (index << 3)
+				: : "r" (this->GetDescriptor(index))
 			);
 			break;
 	}

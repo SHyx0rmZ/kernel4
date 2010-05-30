@@ -26,6 +26,8 @@ class Kernel
 	public:
 		Kernel(MultibootInformation multiboot, uintptr_t paging_structures);
 		~Kernel();
+
+		void Idle();
 };
 
 #endif

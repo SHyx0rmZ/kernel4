@@ -179,6 +179,9 @@ class GDTTable
 		GDTTable(uint8_t size, uintptr_t position);
 		~GDTTable();
 
+		uint16_t	GetDescriptor(GDTEntry entry);
+		uint16_t	GetDescriptor(uint8_t index);
+		GDTEntry	GetEntry(GDTEntry entry);
 		GDTEntry 	GetEntry(uint8_t index);
 		uint8_t		GetIndex(GDTEntry entry);
 		uint8_t 	GetSize();
