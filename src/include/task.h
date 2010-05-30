@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <paging.h>
+#include <list.h>
 
 class TaskState
 {

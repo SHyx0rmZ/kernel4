@@ -25,7 +25,7 @@
 Task::Task(uintptr_t entry) : paging(memory.PAlloc())
 {
 	memset((void *)&this->state, 0, sizeof(TaskState));
-	
+
 	this->state.rip = entry;
 	this->state.rsp = memory.PAlloc();
 	this->state.rflags = 0x202;
@@ -44,5 +44,8 @@ Task::~Task()
 
 TaskManager::TaskManager(uintptr_t kernel)
 {
-	
+	// Setup idle task
+	Task *idle = (Task *)memory.PAlloc();
+
+	idle->state.rip = kernel;
 }

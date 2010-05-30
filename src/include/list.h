@@ -54,7 +54,7 @@ class List
 		ListNode<T> *start;
 		ListNode<T> *end;
 		uint64_t elements;
-}
+};
 
 template <class T>
 ListNode<T>::ListNode(T *data)
@@ -83,13 +83,13 @@ List<T>::~List()
 }
 
 template <class T>
-void List<T>::Add(T *data, uint64_t index);
+void List<T>::Add(T *data, uint64_t index)
 {
 	this->Add(new ListNode<T>(data), index);
 }
 
 template <class T>
-void List<T>::Add(ListNode<T> *data, uint64_t index);
+void List<T>::Add(ListNode<T> *data, uint64_t index)
 {
 	if(this->start == NULL)
 	{
@@ -119,17 +119,37 @@ void List<T>::Add(ListNode<T> *data, uint64_t index);
 			}
 
 			data->Previous = I->Previous;
-			I->Previous->Next = data
+			I->Previous->Next = data;
 			I->Previous = data;
 			data->Next = I;
 		}
 	}
 }
 
-void List<T>::Remove(T *data);
-void List<T>::Remove(ListNode<T> *data);
-void List<T>::Remove(uint64_t index);
-ListNode<T> *List<T>::Search(T *data);
-uint64_t List<T>::Size();
+template <class T>
+void List<T>::Remove(T *data)
+{
+}
+
+template <class T>
+void List<T>::Remove(ListNode<T> *data)
+{
+}
+
+template <class T>
+void List<T>::Remove(uint64_t index)
+{
+}
+
+template <class T>
+ListNode<T> *List<T>::Search(T *data)
+{
+}
+
+template <class T>
+uint64_t List<T>::Size()
+{
+	return this->elements;
+}
 
 #endif
