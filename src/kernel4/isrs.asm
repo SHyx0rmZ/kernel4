@@ -114,14 +114,10 @@ int_common:
 	push rax
 	mov ax, ds
 	push rax
-	push 0
-	push 0
 	
 	mov rdi, rsp
 	call handle_interrupt
 	
-	pop rax
-	pop rax
 	pop rax
 	mov ds, ax
 	pop rax

@@ -19,15 +19,37 @@
 #ifndef _TASK_H_
 #define _TASK_H_
 
-#include <memory.h>
+#include <stdint.h>
+#include <paging.h>
 
 class TaskState
 {
 	public:
-		uint64_t address, length;
 		uint64_t ds, es, fs, gs, rax, rbx, rcx, rdx, rsi, rdi, rbp; 
 		uint64_t r8, r9, r10, r11, r12, r13, r14, r15;
 		uint64_t interrupt, error, rip, cs, rflags, rsp, ss;
 } __attribute__((packed));
+
+class Task
+{
+	public:
+		Task(uintptr_t entry);
+		~Task();
+
+		TaskState state;
+		PagingManager paging;
+};
+
+class TaskManager
+{
+	public:
+		TaskManager(uintptr_t kernel);
+		~TaskManager();
+		
+		void CreateTask(uintptr_t entry);
+		void Schedule(TaskState *state);
+
+		List<Task> tasks;
+};
 
 #endif
