@@ -48,6 +48,8 @@ class List
 		void Remove(ListNode<T> *data);
 		void Remove(uint64_t index);
 		ListNode<T> *Search(T *data);
+		ListNode<T> *Start();
+		ListNode<T> *End();
 		uint64_t Size();
 
 	private:
@@ -98,7 +100,7 @@ void List<T>::Add(ListNode<T> *data, uint64_t index)
 	}
 	else
 	{
-		if(index == -1)
+		if(index == (uint64_t)-1)
 		{
 			this->end->Next = data;
 			data->Previous = this->end;
@@ -150,6 +152,18 @@ template <class T>
 uint64_t List<T>::Size()
 {
 	return this->elements;
+}
+
+template <class T>
+ListNode<T> *List<T>::Start()
+{
+	return this->start;
+}
+
+template <class T>
+ListNode<T> *List<T>::End()
+{
+	return this->end;
 }
 
 #endif

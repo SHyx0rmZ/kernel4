@@ -47,5 +47,20 @@ TaskManager::TaskManager(uintptr_t kernel)
 	// Setup idle task
 	Task *idle = (Task *)memory.PAlloc();
 
+	memset((void *)idle, 0, 4096);
+
+	idle->paging = paging;
 	idle->state.rip = kernel;
+	idle->state.rsp = memory.PAlloc();
+	idle->state.rflags = 0x202;
+	idle->state.cs = gdt.GetDescriptor(GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring0));
+	idle->state.ds = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
+	idle->state.es = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
+	idle->state.ss = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
+
+	if(!idle->state.cs | !idle->state.ds | !idle->state.es | !idle->state.ss)
+			while(1) asm("cli;hlt");
+
+	this->tasks.Add(idle);
+	this->running = this->tasks.Start()->Data;
 }

@@ -51,6 +51,9 @@ class TaskManager
 		void Schedule(TaskState *state);
 
 		List<Task> tasks;
+
+	private:
+		Task *running;
 };
 
 #endif
