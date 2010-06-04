@@ -54,9 +54,10 @@ void *memmove(void *dest, const void *src, size_t n)
 
 	if(dest <= src)
 	{
-		while(b--)
+		while((b + (unsigned long)dest) % sizeof(unsigned long))
 		{
 			*(d++) = *(s++);
+			b--;
 		}
 
 		db = (unsigned long *)d;
@@ -66,12 +67,21 @@ void *memmove(void *dest, const void *src, size_t n)
 		{
 			*(db++) = *(sb++);
 		}
+
+		d = (char *)db;
+		s = (char *)sb;
+
+		while(b--)
+		{
+			*(d++) = *(s++);
+		}
 	}
 	else
 	{
-		while(b--)
+		while((b + (unsigned long)dest) % sizeof(unsigned long))
 		{
 			*(d--) = *(s--);
+			b--;
 		}
 
 		db = (unsigned long *)d;
@@ -80,6 +90,14 @@ void *memmove(void *dest, const void *src, size_t n)
 		while(n--)
 		{
 			*(db--) = *(sb--);
+		}
+
+		d = (char *)db;
+		s = (char *)sb;
+
+		while(b--)
+		{
+			*(d--) = *(s--);
 		}
 	}
 
@@ -95,9 +113,10 @@ void *memset(void *dest, int c, size_t n)
 	n -= b;
 	n /= sizeof(unsigned long);
 
-	while(b--)
+	while((b + (unsigned long)dest) % sizeof(unsigned long))
 	{
 		*(d++) = v;
+		b--;
 	}
 
 	unsigned long *db = (unsigned long *)d;
@@ -105,13 +124,20 @@ void *memset(void *dest, int c, size_t n)
 
 	for(unsigned int i = 0; i < sizeof(unsigned long); i++)
 	{
-		vb <<= 1;
-		vb += v;
+		vb <<= 8;
+		vb |= v;
 	}
 
 	while(n--)
 	{
 		*(db++) = vb;
+	}
+
+	d = (char *)db;
+
+	while(b--)
+	{
+		*(d++) = v;
 	}
 
 	return dest;
