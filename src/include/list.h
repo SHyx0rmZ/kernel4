@@ -44,10 +44,11 @@ class List
 
 		void Add(T *data, uint64_t index = -1);
 		void Add(ListNode<T> *data, uint64_t index = -1);
-		void Remove(T *data);
+		void Remove(T *data, bool reverse = false);
 		void Remove(ListNode<T> *data);
 		void Remove(uint64_t index);
-		ListNode<T> *Search(T *data);
+		ListNode<T> *Search(T *data, bool reverse = false);
+		ListNode<T> *Search(uint64_t index);
 		ListNode<T> *Start();
 		ListNode<T> *End();
 		uint64_t Size();
@@ -100,7 +101,7 @@ void List<T>::Add(ListNode<T> *data, uint64_t index)
 	}
 	else
 	{
-		if(index == (uint64_t)-1)
+		if(index == (uint64_t)-1 || index > this->elements - 1)
 		{
 			this->end->Next = data;
 			data->Previous = this->end;
@@ -108,20 +109,14 @@ void List<T>::Add(ListNode<T> *data, uint64_t index)
 		}
 		else
 		{
-			ListNode<T> *I;
-			uint64_t i;
+			ListNode<T> *I = this->Search(index);
 
-			if(index <= ((this->elements - 1) / 2))
+			if(I->Previous != NULL)
 			{
-				for(i = 0, I = this->start; i < index && I->Next != NULL; i++, I = I->Next);
-			}
-			else
-			{
-				for(i = this->elements - 1, I = this->end; i > index && I->Previous != NULL; i--, I = I->Previous);
+				I->Previous->Next = data;
 			}
 
 			data->Previous = I->Previous;
-			I->Previous->Next = data;
 			I->Previous = data;
 			data->Next = I;
 		}
@@ -129,23 +124,115 @@ void List<T>::Add(ListNode<T> *data, uint64_t index)
 }
 
 template <class T>
-void List<T>::Remove(T *data)
+void List<T>::Remove(T *data, bool reverse)
 {
+	this->Remove(this->Search(data, reverse));
 }
 
 template <class T>
 void List<T>::Remove(ListNode<T> *data)
 {
+	if(data == NULL || this->start == NULL)
+	{
+		return;
+	}
+
+	if(data->Previous != NULL)
+	{
+		data->Previous->Next = data->Next;
+	}
+
+	if(data->Next != NULL)
+	{
+		data->Next->Previous = data->Previous;
+	}
+
+	if(data == this->start)
+	{
+		this->start = data->Next;
+	}
+
+	if(data == this->end)
+	{
+		this->end = data->Previous;
+	}
 }
 
 template <class T>
 void List<T>::Remove(uint64_t index)
 {
+	this->Remove(this->Search(index));
 }
 
 template <class T>
-ListNode<T> *List<T>::Search(T *data)
+ListNode<T> *List<T>::Search(T *data, bool reverse)
 {
+	if(this->start == NULL)
+	{
+		return NULL;
+	}
+
+	ListNode<T> *I;
+
+	if(reverse)
+	{
+		I = this->end;
+
+		while(*I->Data != *data && I->Previous != NULL)
+		{
+			I = I->Previous;
+		}
+	}
+	else
+	{
+		I = this->start;
+
+		while(*I->Data != *data && I->Next != NULL)
+		{
+			I = I->Next;
+		}
+	}
+
+	if(*I->Data != *data)
+	{
+		return NULL;
+	}
+
+	return I;
+}
+
+template <class T>
+ListNode<T> *List<T>::Search(uint64_t index)
+{
+	if(this->start == NULL)
+	{
+		return NULL;
+	}
+
+	if(index > this->elements - 1)
+	{
+		return NULL;
+	}
+
+	ListNode<T> *I;
+	uint64_t i;
+
+	if(index <= ((this->elements - 1) / 2))
+	{
+		for(i = 0, I = this->start; i < index && I->Next != NULL; i++)
+		{
+			I = I->Next;
+		}
+	}
+	else
+	{
+		for(i = this->elements - 1, I = this->end; i > index && I->Previous != NULL; i--)
+		{
+			I = I->Previous;
+		}
+	}
+
+	return I;
 }
 
 template <class T>
