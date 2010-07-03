@@ -509,7 +509,7 @@ bool operator ==(GDTEntry e1, GDTEntry e2)
 		}
 	}
 
-	if((e1.limit_low == e2.limit_low) && (e1.base_low == e2.base_low) && (e1.access == e2.access)
+	if((e1.limit_low == e2.limit_low) && (e1.base_low == e2.base_low) && ((e1.access & 0xFE) == (e2.access & 0xFE))
 			&& (e1.flags_and_limit_high == e2.flags_and_limit_high)
 			&& (e1.base_middle == e2.base_middle) && (e1.base_high == e2.base_high))
 	{
