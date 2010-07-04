@@ -102,6 +102,8 @@ class PagingManager
 		void Invalidate(PagingStructure *page);
 		uintptr_t Address();
 
+		static uintptr_t GetActive();
+
 	private:
 		PageMapLevel4Entry *page_map_level_4;
 		uint16_t pml4i, pdpi, pdi, pti;

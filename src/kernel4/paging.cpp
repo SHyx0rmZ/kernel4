@@ -217,8 +217,22 @@ void PagingManager::UnMap(uintptr_t virtual_address)
 	this->Invalidate(virtual_address);
 }
 
+uintptr_t PagingManager::GetActive()
+{
+	uintptr_t address = NULL;
+
+	asm(
+		"mov %%cr3, %%rax"
+		: "=a" (address)
+	);
+
+	return address;
+}
+
 void PagingManager::UpdateIndexes(uintptr_t address)
 {
+	this->dynamic_page = (PageTableEntry *)(PagingManager::GetActive() + 0x3FF8LL);
+
 	this->pml4i = (address >> 39) & 511;
 	this->pdpi = (address >> 30) & 511;
 	this->pdi = (address >> 21) & 511;
