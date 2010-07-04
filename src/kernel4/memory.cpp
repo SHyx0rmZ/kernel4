@@ -61,6 +61,8 @@ uintptr_t MemoryManager::VAlloc()
 
 	paging.Map(address, address);
 
+	memset((void *)address, 0, 4096);
+
 	return address;
 }
 
