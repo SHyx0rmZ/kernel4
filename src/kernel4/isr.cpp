@@ -122,10 +122,7 @@ void handle_interrupt(TaskState *task)
 
 		out8(0x20, 0x20);
 
-		//asm("int $0");
-		console << ConsoleColor::Green << "new " << ConsoleColor::Gray << "variable @ ";
-		uint64_t *b = new uint64_t;
-		console << ConsoleState::HexFixed << ConsoleColor::Blue << (uint64_t)b << " ";
+		tasking.Schedule(task);
 	}
 	else if(task->interrupt < 0x20)
 	{

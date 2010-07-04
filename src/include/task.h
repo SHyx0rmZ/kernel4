@@ -53,7 +53,8 @@ class TaskManager
 		List<Task> tasks;
 
 	private:
-		Task *running;
+		ListNode<Task> *running;
+		bool active;
 };
 
 #endif

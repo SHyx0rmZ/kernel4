@@ -28,11 +28,14 @@
 #include <idt.h>
 #include <isr.h>
 #include <config.h>
+#include <task.h>
+#include <string.h>
 
 Console console;
 MemoryManager memory;
 PagingManager paging(0x300000);
 GDTTable gdt(5, 0x300000);
+TaskManager tasking(NULL);
 
 extern void test();
 
@@ -97,12 +100,35 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 		memstart = (MultibootMemory *)((uintptr_t)memstart + memstart->size + 4);
 	}
 
+	console << "Replacing temporary Paging structures...";
+
+	PagingManager *p = (PagingManager *)memory.PAlloc();
+	uintptr_t pp = memory.PAlloc(4);
+
+	memset(p, 0, 0x1000);
+	memset((void *)pp, 0, 0x4000);
+
+	*p = PagingManager(pp);
+
+	for(uintptr_t block = 0; block < (((uintptr_t)p + 0x0FFFFFFF) & ~0x0FFFFFFF);) //block += 0x1000)
+	{
+		p->Map(block, block);
+
+		block += 0x1000;
+	}
+
+	paging = *p;
+
+	paging.Load();
+
+	console << ConsoleColor::Green << "WRIN\r\n" << ConsoleColor::Gray;
 	console << "Initializing GDT... ";
 
 	// TODO: Replace address with new()
 	// Set up the GDT
 	//GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
-	gdt = GDTTable(5, memory.PAlloc());
+
+	gdt = GDTTable(5, memory.VAlloc());
 
 	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode,		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
 	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode,		GDTType::Code, GDTRing::Ring0));
@@ -126,7 +152,8 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	// TODO: Replace address with new()
 	// Set up IDT
 	//IDTTable idt(128, 0x200000 - (5 * sizeof(GDTEntry)) - (128 * sizeof(IDTEntry)));
-	IDTTable idt(128, memory.PAlloc());
+
+	IDTTable idt(128, memory.VAlloc());
 
 	// Install dummy handlers for every interrupt
 	for(uint16_t i = 0; i < idt.GetSize(); i++)
@@ -208,18 +235,20 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	out8(0x40, (timer_divisor & 0xFF));
 	out8(0x40, (timer_divisor >> 8));
 
-	// Enable Interrupts (Taskswitchs)
-	//asm("sti");
-
 	console << ConsoleColor::Green << "WRIN\r\n" << ConsoleColor::Gray;
 	console << "Entering endless loop...\r\n";
 
-	paging.Load();
-
 	test();
 
+	tasking = TaskManager((uintptr_t)Kernel::Idle);
+
+	// Enable Interrupts (Taskswitchs)
 	asm("sti");
-	asm("hlt");
+
+	while(1)
+	{
+		asm("hlt");
+	}
 }
 
 void Kernel::Idle()

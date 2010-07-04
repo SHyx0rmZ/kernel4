@@ -29,5 +29,6 @@ extern MemoryManager memory;
 extern PagingManager paging;
 extern Console console;
 extern GDTTable gdt;
+extern TaskManager tasking;
 
 #endif

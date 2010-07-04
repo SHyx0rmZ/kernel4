@@ -36,6 +36,11 @@ Task::Task(uintptr_t entry) : paging(memory.PAlloc())
 
 	if(!this->state.cs | !this->state.ds | !this->state.es | !this->state.fs)
 		while(1){asm("cli;hlt");}
+
+	this->paging.Map(0xFFFFFFFC00000000, this->paging.Address());
+	this->paging.Map(0xFFFFFFFC00001000, this->state.rsp);
+
+	this->paging.Map(this->state.rip & ~0x0FFF, this->state.rip & ~0x0FFF);
 }
 
 Task::~Task()
@@ -44,23 +49,56 @@ Task::~Task()
 
 TaskManager::TaskManager(uintptr_t kernel)
 {
-	// Setup idle task
-	Task *idle = (Task *)memory.PAlloc();
+	if(kernel != (uintptr_t)NULL)
+	{
+		this->running = NULL;
+		this->active = false;
 
-	memset((void *)idle, 0, 4096);
+		// Setup idle task
+		Task *idle = (Task *)memory.PAlloc();
 
-	idle->paging = paging;
-	idle->state.rip = kernel;
-	idle->state.rsp = memory.PAlloc();
-	idle->state.rflags = 0x202;
-	idle->state.cs = gdt.GetDescriptor(GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring0));
-	idle->state.ds = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
-	idle->state.es = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
-	idle->state.ss = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
+		memset((void *)idle, 0, 4096);
 
-	if(!idle->state.cs | !idle->state.ds | !idle->state.es | !idle->state.ss)
-			while(1) asm("cli;hlt");
+		idle->paging = paging;
+		idle->state.rip = kernel;
+		idle->state.rsp = memory.PAlloc();
+		idle->state.rflags = 0x202;
+		idle->state.cs = gdt.GetDescriptor(GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring0));
+		idle->state.ds = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
+		idle->state.es = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
+		idle->state.ss = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
 
-	this->tasks.Add(idle);
-	this->running = this->tasks.Start()->Data;
+		if(!idle->state.cs | !idle->state.ds | !idle->state.es | !idle->state.ss){console << ConsoleColor::Red << "Task has invalid descriptors!";
+				while(1) asm("cli;hlt");}
+
+		this->tasks.Add(idle);
+	}
+}
+
+TaskManager::~TaskManager()
+{
+}
+
+void TaskManager::Schedule(TaskState *state)
+{
+	if(this->active)
+	{
+		memcpy((void *)(&this->running->Data->state), (const void *)state, sizeof(TaskState));
+	}
+	else
+	{
+		this->running = this->tasks.End();
+		this->active = true;
+	}
+
+	if(this->running->Next == NULL)
+	{
+		this->running = this->tasks.Start();
+	}
+	else
+	{
+		this->running = this->running->Next;
+	}
+
+	memcpy((void *)state, (const void *)(&this->running->Data->state), sizeof(TaskState));
 }
