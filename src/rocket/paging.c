@@ -22,14 +22,14 @@
 uint32_t *paging_initialize(uint32_t address)
 {
 	address += 0x0FFF;
-	address &= 0xFFFF1000;
+	address &= 0xFFFFF000;
 
 	uint64_t *pml4e = (uint64_t *)address;
-	*pml4e = address + 0x100BLL;
-	uint64_t *pdpe = (uint64_t *)(address + 0x1000);
-	*pdpe = address + 0x200BLL;
+	*pml4e = address + 0x400BLL;
+	uint64_t *pdpe = (uint64_t *)(address + 0x4000);
+	*pdpe = address + 0x500BLL;
 	
-	uint64_t *pdd = (uint64_t *)(address + 0x2000);
+	uint64_t *pdd = (uint64_t *)(address + 0x5000);
 
 	for(uint8_t i = 0; i < 128; i++)
 	{
@@ -37,12 +37,12 @@ uint32_t *paging_initialize(uint32_t address)
 	}
 
 	uint64_t *pml4ex = (uint64_t *)(address + 0x0FF8);
-	*pml4ex = address + 0x300BLL;
-	uint64_t *pdpex = (uint64_t *)(address + 0x3FF8);
-	*pdpex = address + 0x400BLL;
-	uint64_t *pdx = (uint64_t *)(address + 0x4FF8);
-	*pdx = address + 0x500BLL;
-	uint64_t *ptx = (uint64_t *)(address + 0x5FF8);
+	*pml4ex = address + 0x100BLL;
+	uint64_t *pdpex = (uint64_t *)(address + 0x1FF8);
+	*pdpex = address + 0x200BLL;
+	uint64_t *pdx = (uint64_t *)(address + 0x2FF8);
+	*pdx = address + 0x300BLL;
+	uint64_t *ptx = (uint64_t *)(address + 0x3FF8);
 	*ptx = address + 0x018FLL;
 
 	return (uint32_t *)address;

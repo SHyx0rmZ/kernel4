@@ -25,8 +25,19 @@
 
 PagingManager::PagingManager(uintptr_t address)
 {
-	this->page_map_level_4 = (PageMapLevel4Entry *)address;	
-	this->dynamic_page = (PageTableEntry *)(address + 0x5FF8LL);
+	this->page_map_level_4 = (PageMapLevel4Entry *)address;
+
+	uint64_t *p;
+	p = (uint64_t *)(address + 0x0FF8);
+	*p = address + 0x100BLL;
+	p = (uint64_t *)(address + 0x1FF8);
+	*p = address + 0x200BLL;
+	p = (uint64_t *)(address + 0x2FF8);
+	*p = address + 0x300BLL;
+	p = (uint64_t *)(address + 0x3FF8);
+	*p = address + 0x018FLL;
+
+	this->dynamic_page = (PageTableEntry *)(address + 0x3FF8LL);
 	this->static_pointer = (PagingStructure *)0xFFFFFFFFFFFFF000LL;
 }
 
