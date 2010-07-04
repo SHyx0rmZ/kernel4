@@ -44,7 +44,7 @@ class MemoryManager
 
 		uint64_t GetAvailableMemory();
 		void Initialize(uintptr_t address, uint64_t length);
-		uintptr_t PAlloc();
+		uintptr_t PAlloc(uint8_t blocks_to_allocate = 1);
 		void PFree(uintptr_t block);
 		uintptr_t VAlloc();
 		void VFree(uintptr_t address);

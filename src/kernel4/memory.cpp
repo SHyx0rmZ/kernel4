@@ -113,25 +113,92 @@ void MemoryManager::PFree(uintptr_t block)
 	tree.Add(node);
 }
 
-uintptr_t MemoryManager::PAlloc()
+uintptr_t MemoryManager::PAlloc(uint8_t blocks_to_allocate)
 {
-	if(tree.Size() == 0)
+	if(blocks_to_allocate == 1)
 	{
-		Console console;
-
-		console << ConsoleColor::Red << "No further memory available!\r\nHalting system!";
-
-		while(1)
+		if(tree.Size() == 0)
 		{
-			asm("cli;hlt");
+			Console console;
+
+			console << ConsoleColor::Red << "No further memory available!\r\nHalting system!";
+
+			while(1)
+			{
+				asm("cli;hlt");
+			}
+		}
+
+		SplayTreeNode<MemoryBlock> *node = tree.Top();
+
+		tree.Remove(node);
+
+		return ((uintptr_t)node->Data->Address - sizeof(SplayTreeNode<MemoryBlock>) - sizeof(MemoryBlock));
+	}
+	else if(blocks_to_allocate > 1)
+	{
+		uint8_t allocated_blocks = 0;
+
+		SplayTreeNode<MemoryBlock> *nodes[256];
+
+		do
+		{
+			if(tree.Size() == 0)
+			{
+				Console console;
+
+				console << ConsoleColor::Red << "No further memory available!\r\nHalting system!";
+
+				while(1)
+				{
+					asm("cli;hlt");
+				}
+			}
+
+			nodes[allocated_blocks] = tree.Top();
+
+			tree.Remove(nodes[allocated_blocks]);
+
+			tree.Search(nodes[allocated_blocks]->Data);
+
+			if((allocated_blocks < blocks_to_allocate) && (tree.Top()->Data->Address == (nodes[allocated_blocks]->Data->Address - 0x1000)))
+			{
+				allocated_blocks++;
+			}
+			else
+			{
+				nodes[255] = tree.Top();
+
+				while(allocated_blocks > 0)
+				{
+					tree.Add(nodes[allocated_blocks]);
+
+					allocated_blocks--;
+				}
+
+				tree.Search(nodes[255]->Data);
+			}
+		}
+		while(allocated_blocks < blocks_to_allocate);
+
+		if(allocated_blocks == (blocks_to_allocate))
+		{
+			//for(allocated_blocks = 0; allocated_blocks < blocks_to_allocate; allocated_blocks++)
+			//{
+			//	tree.Remove(nodes[allocated_blocks]);
+			//}
+
+			return ((uintptr_t)nodes[allocated_blocks - 1]->Data->Address - sizeof(SplayTreeNode<MemoryBlock>) - sizeof(MemoryBlock));
+		}
+		else
+		{
+			return NULL;
 		}
 	}
-
-	SplayTreeNode<MemoryBlock> *node = tree.Top();
-
-	tree.Remove(node);
-
-	return ((uintptr_t)node->Data->Address - sizeof(SplayTreeNode<MemoryBlock>) - sizeof(MemoryBlock));
+	else
+	{
+		return NULL;
+	}
 }
 
 MemoryBlock::MemoryBlock()
