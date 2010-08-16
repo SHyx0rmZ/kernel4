@@ -52,27 +52,27 @@ $(DIR_BIN)/fd.img: $(DIR_CONTENT) $(DIR_CONTENT)/rocket.nbl $(DIR_BIN)/libnuke.a
 
 $(DIR_OBJECT)/%_c.o: $(DIR_SOURCE)/%.c
 	@mkdir -p $(dir $@)
-	@echo 'CC       $<'
+	@echo 'CC       $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(CC) $(CFLAGS) $(DIR_INCLUDE) -m64 $< -o $@
 
 $(DIR_OBJECT)/%_32_c.o: $(DIR_SOURCE)/%.c
 	@mkdir -p $(dir $@)
-	@echo 'CC 32    $<'
+	@echo 'CC  32   $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(CC) $(CFLAGS) -m32 $< -o $@
 
 $(DIR_OBJECT)/%_32_asm.o: $(DIR_SOURCE)/%.asm
 	@mkdir -p $(dir $@)
-	@echo 'ASM 32   $<'
+	@echo 'ASM 32   $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(ASM) -f elf32 $< -o $@
 
 $(DIR_OBJECT)/%_asm.o: $(DIR_SOURCE)/%.asm
 	@mkdir -p $(dir $@)
-	@echo 'ASM      $<'
+	@echo 'ASM      $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(ASM) -f elf64 $< -o $@
 
 $(DIR_OBJECT)/%_cpp.o: $(DIR_SOURCE)/%.cpp
 	@mkdir -p $(dir $@)
-	@echo 'CPP      $<'
+	@echo 'CPP      $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(CPP) $(CPPFLAGS) $< -o $@
 
 rocket: $(DIR_CONTENT)
