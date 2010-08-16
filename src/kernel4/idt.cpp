@@ -298,7 +298,7 @@ void IDTTable::MakeActive()
 	// Load this IDTTable into IDTR
 	asm(
 		"lidt %0 \n"
-		: : "g" (*this)
+		: : "m" (*this)
 	);
 }
 

@@ -55,7 +55,7 @@ void PagingManager::Load()
 	asm(
 		"mov %0, %%rax \n"
 		"mov %%rax, %%cr3 \n"
-		: : "g" (*this)
+		: : "m" (*this)
 	);
 }
 

@@ -634,7 +634,7 @@ void GDTTable::MakeActive()
 {
 	asm(
 		"lgdt %0 \n"
-		: : "g" (*this)
+		: : "m" (*this)
 	);
 }
 
