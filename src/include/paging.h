@@ -24,10 +24,10 @@
 
 enum class PageAccess : uint8_t
 {
-	UserReadable = 0,
-	UserWritable = 1,
-	SystemReadable = 2,
-	SystemWritable = 3
+	SystemReadable = 0,
+	SystemWritable = 1,
+	UserReadable = 2,
+	UserWritable = 3
 };
 
 enum class PageCachability : uint8_t
