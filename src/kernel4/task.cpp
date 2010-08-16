@@ -34,8 +34,13 @@ Task::Task(uintptr_t entry) : paging(memory.PAlloc())
 	this->state.es = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring3));
 	this->state.ss = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring3));
 
-	if(!this->state.cs | !this->state.ds | !this->state.es | !this->state.fs)
-		while(1){asm("cli;hlt");}
+	if(!this->state.cs || !this->state.ds || !this->state.es || !this->state.fs)
+	{
+		while(1)
+		{
+			asm("cli;hlt");
+		}
+	}
 
 	this->paging.Map(0xFFFFFFFC00000000, this->paging.Address());
 	this->paging.Map(0xFFFFFFFC00001000, this->state.rsp);
@@ -68,8 +73,13 @@ TaskManager::TaskManager(uintptr_t kernel)
 		idle->state.es = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
 		idle->state.ss = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));
 
-		if(!idle->state.cs | !idle->state.ds | !idle->state.es | !idle->state.ss){console << ConsoleColor::Red << "Task has invalid descriptors!";
-				while(1) asm("cli;hlt");}
+		if(!idle->state.cs || !idle->state.ds || !idle->state.es || !idle->state.ss)
+		{
+			while(1)
+			{
+				asm("cli;hlt");
+			}
+		}
 
 		this->tasks.Add(idle);
 	}
