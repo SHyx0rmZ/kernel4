@@ -34,7 +34,7 @@ Task::Task(uintptr_t entry) : paging(memory.PAlloc())
 	this->state.es = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring3));
 	this->state.ss = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring3));
 
-	if(!this->state.cs || !this->state.ds || !this->state.es || !this->state.fs)
+	if(!this->state.cs || !this->state.ds || !this->state.es || !this->state.ss)
 	{
 		while(1)
 		{
