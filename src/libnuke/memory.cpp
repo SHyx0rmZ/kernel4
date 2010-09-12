@@ -24,17 +24,7 @@ void test()
 
 void *operator new(size_t size)
 {
-	if(size > 4000)
-	{
-		console << ConsoleColor::Red << "You just got pwned by NoobMM!";
-
-		while(1)
-		{
-			asm("cli;hlt");
-		}
-	}
-
-	return (void *)memory.VAlloc();
+	return (void *)memory.VAlloc(size, false);
 }
 
 void *operator new[](size_t size)

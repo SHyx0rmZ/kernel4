@@ -23,7 +23,7 @@ LD = ld -n -e entry
 AR = ar -rcs
 
 CFLAGS = -g -c -Wall -Wextra -Werror -pedantic -std=gnu99 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-leading-underscore -O3
-CPPFLAGS = -g -c -Wall -Wextra -Werror -std=gnu++0x -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -nostdinc++ -fno-use-cxa-atexit -fno-rtti -O0 -m64 $(DIR_INCLUDE)
+CPPFLAGS = -g -c -Wall -Wextra -Werror -std=gnu++0x -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -fno-exceptions -nostdinc++ -fno-use-cxa-atexit -fno-rtti -O2 -m64 $(DIR_INCLUDE)
 
 all: $(DIR_CONTENT) clean-little rocket libnuke kernel image
 
@@ -52,7 +52,7 @@ $(DIR_BIN)/fd.img: $(DIR_CONTENT) $(DIR_CONTENT)/rocket.nbl $(DIR_BIN)/libnuke.a
 
 $(DIR_OBJECT)/%_c.o: $(DIR_SOURCE)/%.c
 	@mkdir -p $(dir $@)
-	@echo 'CC       $(patsubst $(DIR_SOURCE)/%,%,$<)'
+	@echo 'CC  64   $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(CC) $(CFLAGS) $(DIR_INCLUDE) -m64 $< -o $@
 
 $(DIR_OBJECT)/%_32_c.o: $(DIR_SOURCE)/%.c
@@ -67,12 +67,12 @@ $(DIR_OBJECT)/%_32_asm.o: $(DIR_SOURCE)/%.asm
 
 $(DIR_OBJECT)/%_asm.o: $(DIR_SOURCE)/%.asm
 	@mkdir -p $(dir $@)
-	@echo 'ASM      $(patsubst $(DIR_SOURCE)/%,%,$<)'
+	@echo 'ASM 64   $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(ASM) -f elf64 $< -o $@
 
 $(DIR_OBJECT)/%_cpp.o: $(DIR_SOURCE)/%.cpp
 	@mkdir -p $(dir $@)
-	@echo 'CPP      $(patsubst $(DIR_SOURCE)/%,%,$<)'
+	@echo 'CPP 64   $(patsubst $(DIR_SOURCE)/%,%,$<)'
 	@$(CPP) $(CPPFLAGS) $< -o $@
 
 rocket: $(DIR_CONTENT)

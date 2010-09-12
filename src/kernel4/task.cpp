@@ -22,12 +22,12 @@
 #include <managers.h>
 #include <string.h>
 
-Task::Task(uintptr_t entry) : paging(memory.PAlloc())
+Task::Task(uintptr_t entry) : paging(memory.PAlloc(1))
 {
 	memset((void *)&this->state, 0, sizeof(TaskState));
 
 	this->state.rip = entry;
-	this->state.rsp = memory.PAlloc();
+	this->state.rsp = memory.PAlloc(1);
 	this->state.rflags = 0x202;
 	this->state.cs = gdt.GetDescriptor(GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring3));
 	this->state.ds = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring3));
@@ -60,13 +60,13 @@ TaskManager::TaskManager(uintptr_t kernel)
 		this->active = false;
 
 		// Setup idle task
-		Task *idle = (Task *)memory.PAlloc();
+		Task *idle = (Task *)memory.PAlloc(1);
 
 		memset((void *)idle, 0, 4096);
 
 		idle->paging = paging;
 		idle->state.rip = kernel;
-		idle->state.rsp = memory.PAlloc();
+		idle->state.rsp = memory.PAlloc(1);
 		idle->state.rflags = 0x202;
 		idle->state.cs = gdt.GetDescriptor(GDTEntry(GDTMode::LongMode, GDTType::Code, GDTRing::Ring0));
 		idle->state.ds = gdt.GetDescriptor(GDTEntry(GDTMode::ProtectedMode, GDTType::Data, GDTRing::Ring0));

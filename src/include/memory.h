@@ -36,6 +36,35 @@ class MemoryBlock
 		uint64_t Size;
 };
 
+class MemoryBitmap
+{
+	public:
+		MemoryBitmap();
+		~MemoryBitmap();
+
+		uint64_t Size();
+		uintptr_t Find(uint64_t blocks, bool low);
+
+	private:
+		uint64_t bitmap[4096 / sizeof(uint64_t)];
+};
+
+class MemoryStack
+{
+	public:
+		MemoryStack();
+		~MemoryStack();
+
+		uint64_t Size();
+		uintptr_t Pop();
+		void Push(uintptr_t address);
+
+	private:
+		uintptr_t bottom;
+		uintptr_t *stack;
+		uint64_t size;
+};
+
 class MemoryManager
 {
 	public:
@@ -44,13 +73,18 @@ class MemoryManager
 
 		uint64_t GetAvailableMemory();
 		void Initialize(uintptr_t address, uint64_t length);
-		uintptr_t PAlloc(uint8_t blocks_to_allocate = 1);
-		void PFree(uintptr_t block);
-		uintptr_t VAlloc();
+		uintptr_t PAlloc(uint64_t blocks, bool low = false);
+		void PFree(uintptr_t block, uint64_t blocks = 1);
+		uintptr_t VAlloc(uint64_t size, bool low = false);
 		void VFree(uintptr_t address);
 
+		uintptr_t next_free_virtual();
+
 	private:
-		SplayTree<MemoryBlock> tree;
+		//SplayTree<MemoryBlock> tree;
+		MemoryStack stack;
+		MemoryBitmap bitmap;
+		uintptr_t virtualizer;
 };
 
 #endif

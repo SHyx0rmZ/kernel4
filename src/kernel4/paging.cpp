@@ -86,7 +86,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 	{
 		pml4e->Clear();
 		pml4e->SetAccess(PageAccess::UserWritable);
-		pml4e->SetAddress(memory.PAlloc());
+		pml4e->SetAddress(memory.PAlloc(1));
 		pml4e->SetCachability(PageCachability::WriteThroughCachable);
 		pml4e->SetPresence(true);
 
@@ -109,7 +109,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 	{
 		pdpe->Clear();
 		pdpe->SetAccess(PageAccess::UserWritable);
-		pdpe->SetAddress(memory.PAlloc());
+		pdpe->SetAddress(memory.PAlloc(1));
 		pdpe->SetCachability(PageCachability::WriteThroughCachable);
 		pdpe->SetPresence(true);
 
@@ -132,7 +132,7 @@ void PagingManager::Map(uintptr_t virtual_address, uintptr_t physical_address)
 	{
 		pde->Clear();
 		pde->SetAccess(PageAccess::UserWritable);
-		pde->SetAddress(memory.PAlloc());
+		pde->SetAddress(memory.PAlloc(1));
 		pde->SetCachability(PageCachability::WriteThroughCachable);
 		pde->SetPresence(true);
 

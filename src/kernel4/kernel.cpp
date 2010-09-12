@@ -102,7 +102,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 
 	console << "Replacing temporary Paging structures...";
 
-	PagingManager *p = (PagingManager *)memory.PAlloc();
+	PagingManager *p = (PagingManager *)memory.PAlloc(1);
 	uintptr_t pp = memory.PAlloc(4);
 
 	memset(p, 0, 0x1000);
@@ -128,13 +128,15 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	// Set up the GDT
 	//GDTTable gdt(5, 0x200000 - (5 * sizeof(GDTEntry)));
 
-	gdt = GDTTable(5, memory.VAlloc());
+	gdt = GDTTable(7, memory.VAlloc(7 * sizeof(GDTEntry)));
 
 	gdt.SetEntry(0, GDTEntry(GDTMode::RealMode,		GDTType::Code, GDTRing::Ring0, 0, 0, GDTGranularity::Block, GDTPresence::NonPresent));
 	gdt.SetEntry(1, GDTEntry(GDTMode::LongMode,		GDTType::Code, GDTRing::Ring0));
 	gdt.SetEntry(2, GDTEntry(GDTMode::ProtectedMode,	GDTType::Data, GDTRing::Ring0));
 	gdt.SetEntry(3, GDTEntry(GDTMode::LongMode,		GDTType::Code, GDTRing::Ring3));
 	gdt.SetEntry(4, GDTEntry(GDTMode::ProtectedMode,	GDTType::Data, GDTRing::Ring3));
+	gdt.SetEntry(5, AvailableTSS64(0, 104).ToGDTEntryPart1());
+	gdt.SetEntry(6, AvailableTSS64(0, 104).ToGDTEntryPart2());
 
 	// Load GDT and set up proper segments
 	gdt.MakeActive();
@@ -153,7 +155,7 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	// Set up IDT
 	//IDTTable idt(128, 0x200000 - (5 * sizeof(GDTEntry)) - (128 * sizeof(IDTEntry)));
 
-	IDTTable idt(128, memory.VAlloc());
+	IDTTable idt(128, memory.VAlloc(128 * sizeof(IDTEntry)));
 
 	// Install dummy handlers for every interrupt
 	for(uint16_t i = 0; i < idt.GetSize(); i++)
@@ -251,9 +253,43 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 	}
 }
 
+void Tasker1()
+{
+	while(1)
+		console << ConsoleColor::Yellow << "Still Alive... ";
+}
+
+void Tasker2()
+{
+	while(1)
+		console << ConsoleColor::Red << "Still Alive... ";
+}
+
+void Tasker3()
+{
+	while(1)
+		console << ConsoleColor::Blue << "Still Alive... ";
+}
+
+void Tasker4()
+{
+	while(1)
+		console << ConsoleColor::Green << "Still Alive... ";
+}
+
 void Kernel::Idle()
 {
 	console << "Kernel is now idling...\r\n";
+
+	Task tasker1((uintptr_t)Tasker1);
+	Task tasker2((uintptr_t)Tasker2);
+	Task tasker3((uintptr_t)Tasker3);
+	Task tasker4((uintptr_t)Tasker4);
+
+	tasking.tasks.Add(&tasker1);
+	tasking.tasks.Add(&tasker2);
+	tasking.tasks.Add(&tasker3);
+	tasking.tasks.Add(&tasker4);
 
 	while(1)
 	{

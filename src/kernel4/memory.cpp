@@ -27,9 +27,81 @@
 extern const uintptr_t start_kernel;
 extern const uintptr_t end_kernel;
 
+MemoryBitmap::MemoryBitmap()
+{
+	memset(this->bitmap, 0, 4096);
+}
+
+MemoryBitmap::~MemoryBitmap()
+{
+}
+
+uint64_t MemoryBitmap::Size()
+{
+	return 0;
+}
+
+uintptr_t MemoryBitmap::Find(uint64_t blocks, bool low)
+{
+	blocks = 0;
+	low = false;
+
+	return NULL;
+}
+
+MemoryStack::MemoryStack()
+{
+	this->bottom = NULL;
+	this->stack = &this->bottom;
+	this->size = 0;
+}
+
+MemoryStack::~MemoryStack()
+{
+}
+
+void MemoryStack::Push(uintptr_t address)
+{
+	*(uint64_t **)address = this->stack;
+
+	this->stack = (uintptr_t *)address;
+
+	this->size++;
+}
+
+uintptr_t MemoryStack::Pop()
+{
+	uintptr_t page = (uintptr_t)this->stack;
+
+	if(page == (uintptr_t)&this->bottom)
+	{
+		console << ConsoleColor::Red << "Memory stack is empty! Halting system...";
+
+		while(1)
+		{
+			asm("cli;hlt;");
+		}
+	}
+
+	this->stack = *(uintptr_t **)this->stack;
+
+	this->size--;
+
+	return page;
+}
+
+uint64_t MemoryStack::Size()
+{
+	return this->size;
+}
+
 MemoryManager::MemoryManager()
 {
-	this->tree = SplayTree<MemoryBlock>();
+	//this->tree = SplayTree<MemoryBlock>();
+
+	this->bitmap = MemoryBitmap();
+	this->stack = MemoryStack();
+	this->virtualizer = 0xFFFFFFFF80000000;
 }
 
 MemoryManager::~MemoryManager()
@@ -40,21 +112,43 @@ uint64_t MemoryManager::GetAvailableMemory()
 {
 	//return memory.GetSize() * 0x1000;
 
-	return this->tree.Size() * 0x1000;
+	//return this->tree.Size() * 0x1000;
+
+	return (this->bitmap.Size() + this->stack.Size()) * 0x1000;
 }
 
 void MemoryManager::VFree(uintptr_t address)
 {
+	/*
 	//TODO: Replace with actual function
 	//address = NULL;
 	paging.UnMap(address);
 
 	this->PFree(address);
 	address = NULL;
+	*/
+
+	if(address == (uintptr_t)NULL)
+	{
+		return;
+	}
+
+	uint64_t pages = address - sizeof(uint64_t);
+	address -= sizeof(uint64_t);
+
+	for(uint64_t i = 0; i < pages; i++)
+	{
+		paging.UnMap(address + i * 0x1000);
+
+		this->PFree(address + i * 0x1000);
+	}
+
+	address = NULL;
 }
 
-uintptr_t MemoryManager::VAlloc()
+uintptr_t MemoryManager::VAlloc(uint64_t size, bool low)
 {
+	/*
 	//TODO: Replace with actual function
 	//return NULL;
 	uintptr_t address = this->PAlloc();
@@ -64,6 +158,42 @@ uintptr_t MemoryManager::VAlloc()
 	memset((void *)address, 0, 4096);
 
 	return address;
+	*/
+
+	uint64_t pages = (size + sizeof(uint64_t) + 0x0FFF) / 0x1000;
+	uintptr_t address = NULL;
+
+	for(uint64_t i = 0; i < pages; i++)
+	{
+		uintptr_t temporary = this->PAlloc(low);
+
+		if(temporary == (uintptr_t)NULL)
+		{
+			console << ConsoleColor::Red << "Invalid memory block allocated!\r\nHalting system!";
+		}
+
+		if(address == (uintptr_t)NULL)
+		{
+			address = temporary;
+		}
+
+		paging.Map(this->next_free_virtual(), temporary);
+	}
+
+	memset((void *)address, 0, pages * 0x1000);
+
+	*(uint64_t *)address = pages;
+
+	return address + sizeof(uint64_t);
+}
+
+uintptr_t MemoryManager::next_free_virtual()
+{
+	uintptr_t virtualizer = this->virtualizer;
+
+	this->virtualizer += 0x1000;
+
+	return virtualizer;
 }
 
 void MemoryManager::Initialize(uintptr_t address, uint64_t length)
@@ -100,8 +230,9 @@ void MemoryManager::Initialize(uintptr_t address, uint64_t length)
 	}
 }
 
-void MemoryManager::PFree(uintptr_t block)
+void MemoryManager::PFree(uintptr_t block, uint64_t blocks)
 {
+	/*
 	// Comment out for speed
 	//memset((void *)block, 0, 4096);
 
@@ -113,10 +244,46 @@ void MemoryManager::PFree(uintptr_t block)
 	node->Data->Size = 4096 - sizeof(SplayTreeNode<MemoryBlock>) - sizeof(MemoryBlock);
 
 	tree.Add(node);
+	*/
+
+	if(block < 0x08000000)
+	{
+		blocks = 0;
+	}
+	else
+	{
+	}
+
+	return this->stack.Push(block);
 }
 
-uintptr_t MemoryManager::PAlloc(uint8_t blocks_to_allocate)
+uintptr_t MemoryManager::PAlloc(uint64_t blocks, bool low)
 {
+	if(low || (blocks != 1))
+	{
+		this->bitmap.Find(blocks, low);
+
+		return NULL;
+	}
+	else
+	{
+		if(this->stack.Size() == 0)
+		{
+			// TODO: Swap pages
+			console << ConsoleColor::Red << "No further memory available!\r\nHalting system! (For now, should swap)";
+
+			while(1)
+			{
+				asm("cli;hlt");
+			}
+		}
+
+		return this->stack.Pop();
+	}
+
+	return NULL;
+
+	/*
 	if(blocks_to_allocate == 1)
 	{
 		if(tree.Size() == 0)
@@ -200,7 +367,7 @@ uintptr_t MemoryManager::PAlloc(uint8_t blocks_to_allocate)
 	else
 	{
 		return NULL;
-	}
+	}*/
 }
 
 MemoryBlock::MemoryBlock()
