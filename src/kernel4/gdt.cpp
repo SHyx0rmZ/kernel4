@@ -703,3 +703,23 @@ void GDTTable::SetEntry(uint8_t index, GDTEntry entry)
 		this->base[index] = entry;
 	}
 }
+
+AvailableTSS64::AvailableTSS64(uintptr_t position, uint32_t size)
+{
+	this->lower = (size & 0xFFFF) | ((position & 0xFFFFFF) << 16) | (0x89LL << 40) | ((uint64_t)((size >> 16) & 0x0F) << 48) | (((position >> 24) & 0xFF) << 56);
+	this->upper = ((position >> 32) & 0xFFFFFFFF);
+}
+
+AvailableTSS64::~AvailableTSS64()
+{
+}
+
+GDTEntry AvailableTSS64::ToGDTEntryPart1()
+{
+	return *(GDTEntry *)&this->lower;
+}
+
+GDTEntry AvailableTSS64::ToGDTEntryPart2()
+{
+	return *(GDTEntry *)&this->upper;
+}

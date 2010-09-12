@@ -244,6 +244,12 @@ Kernel::Kernel(MultibootInformation multiboot, uintptr_t paging_structures)
 
 	tasking = TaskManager((uintptr_t)Kernel::Idle);
 
+	console << "Activating TSS";
+
+	//uint16_t tss = 5 << 3;
+
+	//asm("ltr %0" : : "m"(tss));
+
 	// Enable Interrupts (Taskswitchs)
 	asm("sti");
 

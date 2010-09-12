@@ -195,4 +195,18 @@ class GDTTable
 		GDTEntry *base;
 } __attribute__((packed));
 
+class AvailableTSS64
+{
+	public:
+		AvailableTSS64(uintptr_t position, uint32_t size);
+		~AvailableTSS64();
+
+		GDTEntry	ToGDTEntryPart1();
+		GDTEntry	ToGDTEntryPart2();
+
+	private:
+		uint64_t lower;
+		uint64_t upper;
+} __attribute__((packed));
+
 #endif
